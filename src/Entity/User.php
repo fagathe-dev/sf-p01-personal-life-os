@@ -65,9 +65,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(nullable: true)]
     private ?array $preferences = null;
 
+    /**
+     * @var Collection<int, Tag>
+     */
+    #[ORM\OneToMany(targetEntity: Tag::class, mappedBy: 'owner', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $tags;
+
+    /**
+     * @var Collection<int, Note>
+     */
+    #[ORM\OneToMany(targetEntity: Note::class, mappedBy: 'owner', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $notes;
+
+    /**
+     * @var Collection<int, Folder>
+     */
+    #[ORM\OneToMany(targetEntity: Folder::class, mappedBy: 'owner')]
+    private Collection $folders;
+
+    #[ORM\OneToOne(mappedBy: 'owner', cascade: ['persist', 'remove'])]
+    private ?Journal $journal = null;
+
+    #[ORM\Column(length: 80, nullable: true)]
+    private ?string $firstname = null;
+
+    #[ORM\Column(length: 80)]
+    private ?string $lastname = null;
+
     public function __construct()
     {
         $this->userRequests = new ArrayCollection();
+        $this->tags = new ArrayCollection();
+        $this->notes = new ArrayCollection();
+        $this->folders = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -277,5 +307,148 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->preferences = $preferences;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Tag>
+     */
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
+
+    public function addTag(Tag $tag): static
+    {
+        if (!$this->tags->contains($tag)) {
+            $this->tags->add($tag);
+            $tag->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTag(Tag $tag): static
+    {
+        if ($this->tags->removeElement($tag)) {
+            // set the owning side to null (unless already changed)
+            if ($tag->getOwner() === $this) {
+                $tag->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Note>
+     */
+    public function getNotes(): Collection
+    {
+        return $this->notes;
+    }
+
+    public function addNote(Note $note): static
+    {
+        if (!$this->notes->contains($note)) {
+            $this->notes->add($note);
+            $note->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNote(Note $note): static
+    {
+        if ($this->notes->removeElement($note)) {
+            if ($note->getOwner() === $this) {
+                $note->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getJournal(): ?Journal
+    {
+        return $this->journal;
+    }
+
+    public function setJournal(?Journal $journal): static
+    {
+        if ($journal === null && $this->journal !== null) {
+            $this->journal->setOwner(null);
+        }
+
+        if ($journal !== null && $journal->getOwner() !== $this) {
+            $journal->setOwner($this);
+        }
+
+        $this->journal = $journal;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Folder>
+     */
+    public function getFolders(): Collection
+    {
+        return $this->folders;
+    }
+
+    public function addFolder(Folder $folder): static
+    {
+        if (!$this->folders->contains($folder)) {
+            $this->folders->add($folder);
+            $folder->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFolder(Folder $folder): static
+    {
+        if ($this->folders->removeElement($folder)) {
+            // set the owning side to null (unless already changed)
+            if ($folder->getOwner() === $this) {
+                $folder->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getFirstname(): ?string
+    {
+        return $this->firstname;
+    }
+
+    public function setFirstname(?string $firstname): static
+    {
+        $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    public function getLastname(): ?string
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname(string $lastname): static
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+
+
+    public function getUsernameDisplay(): string
+    {
+        if ($this->firstname && $this->lastname) {
+            return ucfirst($this->firstname) . ' ' . strtoupper($this->lastname);
+        }
+
+        return '@' . (string) $this->username;
     }
 }
