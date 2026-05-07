@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -39,6 +40,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 80)]
+    #[Assert\Length(max: 80, maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.')]
+    #[Assert\NotBlank(allowNull: true, message: 'Veuillez saisir un nom d\'utilisateur')]
     private ?string $username = null;
 
     #[ORM\Column]
@@ -87,9 +90,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?Journal $journal = null;
 
     #[ORM\Column(length: 80, nullable: true)]
+    #[Assert\Length(max: 80, maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.')]
+    #[Assert\NotBlank(allowNull: true, message: 'Veuillez saisir un prénom')]
     private ?string $firstname = null;
 
-    #[ORM\Column(length: 80)]
+    #[ORM\Column(length: 80, nullable: true)]
+    #[Assert\Length(max: 80, maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.')]
+    #[Assert\NotBlank(allowNull: true, message: 'Veuillez saisir un nom')]
     private ?string $lastname = null;
 
     public function __construct()
