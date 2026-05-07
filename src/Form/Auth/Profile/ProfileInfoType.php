@@ -8,8 +8,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ProfileInfoType extends AbstractType
 {
@@ -24,14 +22,29 @@ class ProfileInfoType extends AbstractType
                 ],
                 'row_attr' => [
                     'class' => 'form-group',
+                ]
+            ])
+            ->add('firstname', TextType::class, [
+                'label' => 'Prénom',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'ex : Jean',
+                    'class' => 'form-control'
                 ],
-                'constraints' => [
-                    new NotBlank(message: 'Veuillez saisir un nom d\'utilisateur', ),
-                    new Length(
-                        max: 80,
-                        maxMessage: 'Le nom d\'utilisateur ne peut pas dépasser {{ limit }} caractères'
-                    ),
+                'row_attr' => [
+                    'class' => 'form-group',
+                ]
+            ])
+            ->add('lastname', TextType::class, [
+                'label' => 'Nom',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'ex : Dupont',
+                    'class' => 'form-control'
                 ],
+                'row_attr' => [
+                    'class' => 'form-group',
+                ]
             ])
             ->add('save', SubmitType::class, [
                 'label' => 'Enregistrer',

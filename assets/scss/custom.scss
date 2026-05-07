@@ -16,8 +16,11 @@
   }
 }
 
-[type=email], [type=number], [type=tel], [type=url] {
-    direction: ltr;
+[type='email'],
+[type='number'],
+[type='tel'],
+[type='url'] {
+  direction: ltr;
 }
 
 .page-title-box .breadcrumb {
@@ -31,15 +34,24 @@
 .jumbotron {
   padding: 1.5rem 1rem;
   box-shadow: var(--vz-box-shadow);
-  border-radius: .3rem;
+  border-radius: 0.3rem;
   background-color: #f3f4f6;
   font-size: 1rem;
   font-weight: 400;
   color: var(--vz-dark);
-  margin-block-end: .5rem;
+  margin-block-end: 0.5rem;
 }
- 
+
 .auth-one-bg {
   background: url(/images/auth-cover.jpg) no-repeat center center;
   background-size: cover;
+}
+
+$custom-colors:
+  blue, indigo, purple, pink, red, orange, yellow, green, teal, cyan;
+
+@each $color in $custom-colors {
+  .bg-#{$color} {
+    background-color: var(--vz-#{$color}) !important;
+  }
 }
