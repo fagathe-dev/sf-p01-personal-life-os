@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-app_dir='/Users/fagathe/workspace/perso/sf-p04-boilerplate'
-app_host='dev.sf-p04-boilerplate.fagathe-dev.fr'
+app_dir='/Users/fagathe/workspace/perso/sf-p04-personal-life-os'
+app_host='dev.sf-p04-personal-life-os.fagathe-dev.fr'
 port='9600'
 db_driver='mysql'
 
