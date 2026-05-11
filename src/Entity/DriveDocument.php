@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 class DriveDocument extends AbstractFile
 {
     #[ORM\Column(length: 30, nullable: true, enumType: ContentStateEnum::class, options: ['default' => ContentStateEnum::Open->value])]
-    private ?ContentStateEnum $state = null;
+    private ContentStateEnum|string|null $state = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]

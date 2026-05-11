@@ -24,7 +24,7 @@ class Tag
     private ?string $description = null;
 
     #[ORM\Column(length: 20, nullable: true, enumType: TagColorEnum::class)]
-    private ?TagColorEnum $color = null;
+    private TagColorEnum|string|null $color = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;

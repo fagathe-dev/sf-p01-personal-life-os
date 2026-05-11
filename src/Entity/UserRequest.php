@@ -15,7 +15,7 @@ class UserRequest
     private ?int $id = null;
 
     #[ORM\Column(length: 50, enumType: UserRequestTypeEnum::class)]
-    private ?UserRequestTypeEnum $type = null;
+    private UserRequestTypeEnum|string|null $type = null;
 
     #[ORM\Column(length: 255)]
     private ?string $token = null;
@@ -51,8 +51,12 @@ class UserRequest
         return $this->type;
     }
 
-    public function setType(UserRequestTypeEnum $type): static
+    public function setType(UserRequestTypeEnum|string $type): static
     {
+        if (is_string($type)) {
+            $type = UserRequestTypeEnum::tryFrom($type);
+        }
+
         $this->type = $type;
 
         return $this;

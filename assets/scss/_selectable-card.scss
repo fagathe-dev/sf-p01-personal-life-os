@@ -1,0 +1,53 @@
+// _selectable.scss (Version adaptée Velzon)
+
+.form-selectable.custom-form-selectable {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+
+  .form-selectable-item {
+    position: relative;
+    cursor: pointer;
+    display: inline-flex;
+
+    // L'input est caché mais reste focusable pour l'accessibilité
+    .form-selectable-input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    // Le label devient la pastille de couleur
+    .form-selectable-label {
+      display: inline-block;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+      cursor: pointer;
+
+      &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    // Gestion de l'état actif (géré par selectable.ts ou le state :checked)
+    &.active .form-selectable-label,
+    .form-selectable-input:checked + .form-selectable-label {
+      // Effet "Double Ring" avec la couleur de la bordure Velzon
+      box-shadow: 0 0 0 2px var(--vz-card-bg-custom, #fff), 0 0 0 4px var(--vz-primary);
+      transform: scale(1.1);
+      border-color: transparent;
+    }
+
+    // Ajout d'un outline pour la navigation au clavier
+    .form-selectable-input:focus-visible + .form-selectable-label {
+      outline: 2px solid var(--vz-primary);
+      outline-offset: 4px;
+    }
+  }
+}

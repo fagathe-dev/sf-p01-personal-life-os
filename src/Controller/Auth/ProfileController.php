@@ -1,15 +1,20 @@
 <?php
 namespace App\Controller\Auth;
 
+use App\Entity\Tag;
 use App\Entity\User;
 use App\Enum\UserPreference\ThemePreferenceEnum;
 use App\Form\Auth\Profile\ChangeEmailType;
 use App\Form\Auth\Profile\ChangePasswordType;
 use App\Form\Auth\Profile\ProfileInfoType;
+use App\Form\Auth\Profile\TagType;
 use App\Security\Authenticator\FormLoginAuthenticator;
 use App\Service\UserRequest\UserRequestService;
 use App\Service\UserService;
+use App\Service\TagService;
+use Fagathe\CorePhp\Breadcrumb\BreadcrumbItem;
 use Fagathe\CorePhp\Uploader\FileUploadException;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -24,6 +29,7 @@ final class ProfileController extends AbstractController
 
     public function __construct(
         private readonly UserService $userService,
+        private readonly TagService $tagService,
         private readonly Security $security,
     ) {
     }
@@ -31,9 +37,11 @@ final class ProfileController extends AbstractController
     #[Route(path: '', name: 'index', methods: ['GET', 'POST'])]
     public function index(Request $request): Response
     {
+        $tags = $this->tagService->getCurrentUserTags();
         $user = $this->getUser() ?? new User;
         $infoForm = $this->createForm(ProfileInfoType::class, $user);
         $infoForm->handleRequest($request);
+
 
         $themePreferences = ThemePreferenceEnum::choices();
 
@@ -93,7 +101,7 @@ final class ProfileController extends AbstractController
             return $this->redirectToRoute('auth_profile_index', ['t' => 'settings']);
         }
 
-        return $this->render('auth/profile/index.html.twig', compact('infoForm', 'emailForm', 'passwordForm', 'user', 'themePreferences'));
+        return $this->render('auth/profile/index.html.twig', compact('infoForm', 'emailForm', 'passwordForm', 'user', 'themePreferences', 'tags'));
     }
 
     #[Route(path: '/update', name: 'update', methods: ['POST'])]
@@ -174,6 +182,78 @@ final class ProfileController extends AbstractController
 
         $this->addFlash('error', 'Ce lien de confirmation est invalide ou a expiré.');
         return $this->redirectToRoute('auth_profile_index', ['t' => 'settings']);
+    }
+
+    #[Route(path: '/tag', name: 'tag_create', methods: ['POST', 'GET'])]
+    public function addTag(Request $request): Response
+    {
+        $tag = new Tag;
+        $form = $this->createForm(TagType::class, $tag);
+        $form->handleRequest($request);
+        $breadcrumb = $this->tagService->breadcrumb([new BreadcrumbItem('Ajout d\'une étiquette')]);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $this->tagService->saveTag($tag, true);
+
+            return $this->redirectToRoute('auth_profile_index', ['t' => 'tags']);
+        }
+
+        return $this->render('auth/profile/tag.html.twig', compact('form', 'breadcrumb'));
+    }
+
+    #[Route(path: '/tag/edit/{id}', name: 'tag_edit', methods: ['POST', 'GET'])]
+    public function editTag(Request $request, #[MapEntity(mapping: ['id' => 'id'])] Tag $tag): Response
+    {
+        $form = $this->createForm(TagType::class, $tag);
+        $form->handleRequest($request);
+        $breadcrumb = $this->tagService->breadcrumb([new BreadcrumbItem('Modifier une étiquette')]);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $tag = $form->getData();
+            $tag->setOwner($this->getUser());
+
+            if ($form->isSubmitted() && $form->isValid()) {
+
+                $this->tagService->saveTag($tag, true);
+
+                return $this->redirectToRoute('auth_profile_index', ['t' => 'tags']);
+            }
+        }
+
+        return $this->render('auth/profile/tag.html.twig', compact('form', 'breadcrumb'));
+    }
+
+    #[Route(path: '/tag/delete/{id}', name: 'tag_delete', methods: ['POST'])]
+    public function deleteTag(Request $request, #[MapEntity(mapping: ['id' => 'id'])] Tag $tag): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // 1. Vérification de sécurité (CSRF)
+        $csrfToken = $request->request->getString('_token');
+        if (!$this->isCsrfTokenValid('delete_tag' . $tag->getId(), $csrfToken)) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('auth_profile_index', ['t' => 'tags']);
+        }
+
+        // 2. Vérification d'autorisation : On ne supprime que ses propres tags !
+        if ($tag->getOwner() !== $user) {
+            $this->addFlash('error', 'Vous n\'êtes pas autorisé à supprimer cette étiquette.');
+            return $this->redirectToRoute('auth_profile_index', ['t' => 'tags']);
+        }
+
+        // 3. Suppression
+        $isDeleted = $this->tagService->deleteTag($tag);
+
+        if ($isDeleted) {
+            $this->addFlash('success', 'L\'étiquette a été supprimée avec succès.');
+        } else {
+            $this->addFlash('error', 'Une erreur est survenue lors de la suppression.');
+        }
+
+        // Redirection vers le profil en forçant l'ouverture de l'onglet tags
+        return $this->redirectToRoute('auth_profile_index', ['t' => 'tags']);
     }
 
 }

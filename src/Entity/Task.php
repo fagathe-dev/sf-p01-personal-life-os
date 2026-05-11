@@ -43,10 +43,10 @@ class Task
     private ?\DateTime $due_date = null;
 
     #[ORM\Column(length: 30, nullable: true, enumType: TaskPriorityEnum::class, options: ["default" => TaskPriorityEnum::Low->value])]
-    private ?TaskPriorityEnum $priority = null;
+    private TaskPriorityEnum|string|null $priority = null;
 
     #[ORM\Column(length: 30, nullable: true, enumType: TaskStateEnum::class, options: ["default" => TaskStateEnum::Todo->value])]
-    private ?TaskStateEnum $state = null;
+    private TaskStateEnum|string|null $state = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
