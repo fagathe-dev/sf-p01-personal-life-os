@@ -29,7 +29,7 @@ abstract class AbstractFile
     protected ?string $mimeType = null;
 
     #[ORM\Column(length: 30, nullable: true, enumType: FileTypeEnum::class)]
-    protected ?FileTypeEnum $type = null;
+    protected FileTypeEnum|string|null $type = null;
 
     #[ORM\Column(length: 10)]
     protected ?string $extension = null;

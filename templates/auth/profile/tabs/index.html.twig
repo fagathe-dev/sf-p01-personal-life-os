@@ -1,10 +1,15 @@
-{% set current = app.request.query.get('t') ?? 'informations' %}
+{% set current = app.request.query.get('t') ?? 'tags' %}
 {% set profile_tabs = [{
+  'id': 'tags',
+  'active': current == 'tags',
+  'label': 'Étiquettes',
+  'content': 'tags'
+},{
   'id': 'infos',
   'active': current == 'informations',
   'label': 'Informations',
   'content': 'infos'
-}, {
+},  {
   'id': 'preferences',
   'active': current == 'preferences',
   'label': 'Préférences',

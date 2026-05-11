@@ -15,7 +15,7 @@ class Note extends AbstractTextEntry
     private ?string $title = null;
 
     #[ORM\Column(length: 30, enumType: ContentStateEnum::class)]
-    private ContentStateEnum $state = ContentStateEnum::Open;
+    private ContentStateEnum|string|null $state = ContentStateEnum::Open;
 
     #[ORM\ManyToOne(inversedBy: 'notes')]
     #[ORM\JoinColumn(nullable: false)]
@@ -49,8 +49,12 @@ class Note extends AbstractTextEntry
         return $this->state;
     }
 
-    public function setState(ContentStateEnum $state): static
+    public function setState(ContentStateEnum|string $state): static
     {
+        if (is_string($state)) {
+            $state = ContentStateEnum::tryFrom($state);
+        }
+
         $this->state = $state;
 
         return $this;
