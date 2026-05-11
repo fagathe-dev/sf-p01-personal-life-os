@@ -1,8 +1,11 @@
 import { ROUTES } from '@/constantes/routes';
 import { FileUploader, SelectableField, $ } from 'core-ts';
+import { CustomSelector } from '@/features';
 
 document.addEventListener('DOMContentLoaded', (): void => {
-  const inputElement = $<HTMLInputElement>('#profile-img-file-input') as HTMLInputElement | null;
+  const inputElement = $<HTMLInputElement>(
+    '#profile-img-file-input',
+  ) as HTMLInputElement | null;
 
   if (!inputElement) {
     return;
@@ -29,7 +32,11 @@ document.addEventListener('DOMContentLoaded', (): void => {
       // ----------------------------------------------------
       const profileUser = $<HTMLElement>('.profile-user') as HTMLElement | null;
       if (profileUser) {
-        const existingImg = $<HTMLImageElement>('.user-profile-image', false, profileUser) as HTMLImageElement | null;
+        const existingImg = $<HTMLImageElement>(
+          '.user-profile-image',
+          false,
+          profileUser,
+        ) as HTMLImageElement | null;
 
         if (existingImg) {
           existingImg.src = base64Url;
@@ -38,7 +45,12 @@ document.addEventListener('DOMContentLoaded', (): void => {
           const img = document.createElement('img');
           img.src = base64Url;
           img.alt = 'user-profile-image';
-          img.classList.add('rounded-circle', 'avatar-xl', 'img-thumbnail', 'user-profile-image');
+          img.classList.add(
+            'rounded-circle',
+            'avatar-xl',
+            'img-thumbnail',
+            'user-profile-image',
+          );
 
           const fileInputWrapper = inputElement.closest('.profile-photo-edit');
           if (fileInputWrapper) {
@@ -47,7 +59,11 @@ document.addEventListener('DOMContentLoaded', (): void => {
             profileUser.prepend(img);
           }
 
-          const fallback = $<HTMLElement>('.avatar-xl.shadow.rounded-circle', false, profileUser) as HTMLElement | null;
+          const fallback = $<HTMLElement>(
+            '.avatar-xl.shadow.rounded-circle',
+            false,
+            profileUser,
+          ) as HTMLElement | null;
           if (fallback) {
             fallback.remove();
           }
@@ -57,10 +73,16 @@ document.addEventListener('DOMContentLoaded', (): void => {
       // ----------------------------------------------------
       // 2. MISE À JOUR DE L'AVATAR DANS LA NAVBAR (TOPBAR)
       // ----------------------------------------------------
-      const navbarAvatarContainer = $<HTMLElement>('#navbar-user-avatar') as HTMLElement | null;
+      const navbarAvatarContainer = $<HTMLElement>(
+        '#navbar-user-avatar',
+      ) as HTMLElement | null;
       if (navbarAvatarContainer) {
         // On cherche l'image existante avec sa classe spécifique à la navbar
-        const navbarImg = $<HTMLImageElement>('.header-profile-user', false, navbarAvatarContainer) as HTMLImageElement | null;
+        const navbarImg = $<HTMLImageElement>(
+          '.header-profile-user',
+          false,
+          navbarAvatarContainer,
+        ) as HTMLImageElement | null;
 
         if (navbarImg) {
           // Si l'image existe déjà, on remplace juste la source
@@ -76,7 +98,11 @@ document.addEventListener('DOMContentLoaded', (): void => {
           navbarAvatarContainer.prepend(img);
 
           // On cherche et on supprime le bloc contenant les initiales
-          const fallback = $<HTMLElement>('.avatar-xs', false, navbarAvatarContainer) as HTMLElement | null;
+          const fallback = $<HTMLElement>(
+            '.avatar-xs',
+            false,
+            navbarAvatarContainer,
+          ) as HTMLElement | null;
           if (fallback) {
             fallback.remove();
           }
@@ -90,8 +116,33 @@ document.addEventListener('DOMContentLoaded', (): void => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    const container = $<HTMLElement>('.js-selectable-container') as HTMLElement | null;
-    if (container) {
-        new SelectableField(container, { mode: 'radio' });
-    }
+  const container = $<HTMLElement>(
+    '.js-selectable-container',
+  ) as HTMLElement | null;
+  if (container) {
+    new SelectableField(container, { mode: 'radio' });
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialise tous les sélecteurs custom de la page
+  const dropdownSelectContainers = $<HTMLElement>(
+    '.js-dropdown-select',
+    true,
+  ) as NodeListOf<HTMLElement> | null;
+
+  if (dropdownSelectContainers) {
+    dropdownSelectContainers.forEach((container) => {
+      // Astuce : tu peux même lire le mode désiré via un attribut de données (data-mode="single" par exemple) pour rendre le composant plus générique et réutilisable dans d'autres contextes que le profil !
+      // pour ne pas figer le composant en multiple !
+      const mode =
+        (container.getAttribute('data-dcs-mode') as any) || 'multiple-nullable';
+
+      new CustomSelector(container, {
+        mode: mode,
+        placeholder:
+          container.getAttribute('data-dcs-placeholder') || 'Sélectionner...',
+      });
+    });
+  }
 });
