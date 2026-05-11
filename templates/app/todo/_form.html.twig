@@ -1,0 +1,61 @@
+{# templates/app/todo/_form.html.twig #}
+{{ form_start(form) }}
+
+  <div class="row">
+    <div class="col-12 mb-3">
+      {{ form_label(form.title, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}
+      {{ form_widget(form.title, {'attr': {'class': 'form-control form-control-lg'}}) }}
+      {{ form_errors(form.title) }}
+    </div>
+
+    <div class="col-12 mb-4">
+      {{ form_label(form.description, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}
+      {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+      {{ form_errors(form.description) }}
+    </div>
+
+    <div class="col-md-6 mb-3">
+      {{ form_label(form.due_date, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}
+      {{ form_widget(form.due_date, {'attr': {'class': 'form-control'}}) }}
+    </div>
+      
+    <div class="col-md-6 mb-3">
+      {{ form_label(form.state, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}
+      {{ form_widget(form.state, {'attr': {'class': 'form-select'}}) }}
+    </div>
+
+    {# Utilisation de nos CustomSelectors #}
+    <div class="col-md-6 mb-3">
+      {{ form_label(form.priority, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}
+      {% include 'components/_custom-dropdown-select.html.twig' with {
+        'field': form.priority,
+        'cds_mode': 'single',
+        'cds_placeholder': 'Sélectionner une priorité...'
+      } %}
+    </div>
+
+    <div class="col-md-6 mb-4">
+      {{ form_label(form.tags, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}
+      {% include 'components/_custom-dropdown-select.html.twig' with {
+        'field': form.tags,
+        'cds_mode': 'multiple-nullable',
+        'cds_placeholder': 'Ajouter des étiquettes...'
+      } %}
+    </div>
+
+    <div class="col-12 mb-4">
+      <div class="form-check form-switch form-switch-lg">
+        {{ form_widget(form.is_completed, {'attr': {'class': 'form-check-input', 'role': 'switch'}}) }}
+        {{ form_label(form.is_completed, null, {'label_attr': {'class': 'form-check-label fw-medium ms-2'}}) }}
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2 border-top pt-3 mt-2">
+    <a href="{{ path('app_todo_index') }}" class="btn btn-light">Annuler</a>
+    <button type="submit" class="btn btn-primary">
+      <i class="ri-save-3-line align-middle me-1"></i> Enregistrer
+    </button>
+  </div>
+
+{{ form_end(form) }}

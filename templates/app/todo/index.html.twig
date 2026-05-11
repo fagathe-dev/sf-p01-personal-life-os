@@ -1,0 +1,82 @@
+{# templates/app/todo/index.html.twig #}
+{% extends 'layouts/dashboard.html.twig' %}
+
+{% block title %}Mes Tâches{% endblock %}
+
+{% block content %}
+  <div class="container-fluid py-4" style="max-width: 900px;">
+    
+    {# En-tête #}
+    <div class="row mb-4 align-items-center">
+      <div class="col">
+        <h1 class="h3 mb-0 text-gray-800">Mes Tâches</h1>
+      </div>
+      <div class="col-auto">
+        <a href="{{ path('app_todo_create') }}" class="btn btn-primary shadow-sm">
+          <i class="ri-add-line align-middle me-1"></i> Nouvelle tâche
+        </a>
+      </div>
+    </div>
+
+    {# Barre d'ajout rapide & Filtres #}
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body p-3">
+        <div class="row g-3">
+          <div class="col-md-8">
+            <form action="{{ path('app_todo_create') }}" method="POST" id="quick-add-form">
+              <div class="search-box">
+                {# Attribut name ajouté pour pouvoir le lire dans le controller si besoin #}
+                <input type="text" name="quick_title" class="form-control bg-light border-light" placeholder="Ajouter une tâche... (Appuyez sur Entrée)" required>
+                <i class="ri-add-line search-icon"></i>
+              </div>
+            </form>
+          </div>
+          <div class="col-md-4">
+            {# Note : Pour l'MVP, on simule un select simple. On le remplacera par un vrai champ FormType avec notre CustomSelector dans l'Issue 4 #}
+            <select class="form-select bg-light border-light js-dropdown-select" data-cds-mode="multiple-nullable" data-cds-placeholder="Filtrer par étiquettes...">
+              <option value="">Toutes les étiquettes</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Liste des tâches Actives #}
+    <div class="todo-content">
+      <div class="list-group shadow-sm mb-5" id="active-tasks-list">
+        {% set active_tasks = tasks|filter(t => not t.isCompleted) %}
+          
+        {% for task in active_tasks %}
+          {% include 'app/todo/_component.html.twig' with {'task': task} %}
+        {% endfor %}
+        
+        {# L'état vide "Aucune tâche" est sorti de la boucle for..else pour toujours exister dans le DOM (masqué ou non) #}
+        <div id="empty-active-state" class="list-group-item text-center text-muted py-5 border-0 {{ active_tasks|length > 0 ? 'd-none' : '' }}">
+          <i class="ri-checkbox-circle-line display-4 d-block mb-2 opacity-50"></i>
+          Aucune tâche à faire. Profitez de votre journée !
+        </div>
+      </div>
+
+      {# Liste des tâches Terminées #}
+      {% set completed_tasks = tasks|filter(t => t.isCompleted) %}
+      
+      {# 2. Modification : Toujours présent dans le DOM, masqué via 'd-none' si vide #}
+      <div id="completed-tasks-container" class="{{ completed_tasks|length == 0 ? 'd-none' : '' }}">
+        <div class="d-flex align-items-center mb-3" data-bs-toggle="collapse" data-bs-target="#completedTasks" style="cursor: pointer;">
+          <h5 class="mb-0 fs-14 text-muted"><i class="ri-arrow-down-s-line align-middle me-1"></i> Terminées</h5>
+          {# Un ID sur le badge pour mettre à jour le compteur en JS #}
+          <span class="badge bg-success-subtle text-success ms-2" id="completed-tasks-count">{{ completed_tasks|length }}</span>
+        </div>
+        
+        <div class="collapse show" id="completedTasks">
+          {# Un ID sur la liste pour append/prepend facilement les items en JS #}
+          <div class="list-group shadow-sm" id="completed-tasks-list">
+            {% for task in completed_tasks %}
+              {% include 'app/todo/_component.html.twig' with {'task': task} %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

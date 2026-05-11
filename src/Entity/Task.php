@@ -40,7 +40,7 @@ class Task
     private ?\DateTimeImmutable $updated_at = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTime $due_date = null;
+    private ?\DateTimeImmutable $due_date = null;
 
     #[ORM\Column(length: 30, nullable: true, enumType: TaskPriorityEnum::class, options: ["default" => TaskPriorityEnum::Low->value])]
     private TaskPriorityEnum|string|null $priority = null;
@@ -152,12 +152,12 @@ class Task
         return $this;
     }
 
-    public function getDueDate(): ?\DateTime
+    public function getDueDate(): ?\DateTimeImmutable
     {
         return $this->due_date;
     }
 
-    public function setDueDate(?\DateTime $due_date): static
+    public function setDueDate(?\DateTimeImmutable $due_date): static
     {
         $this->due_date = $due_date;
 

@@ -58,3 +58,19 @@ $custom-colors:
     background-color: var(--vz-#{$color}) !important;
   }
 }
+
+.list-group-item-action:not(.active):focus,
+.list-group-item-action:not(.active):hover {
+  background-color: var(--vz-white);
+}
+
+.btn-white {
+  background-color: var(--vz-white);
+  color: var(--vz-dark);
+  border: 1px solid var(--vz-light);
+  &:hover {
+    background-color: var(--vz-light);
+    color: var(--vz-dark);
+    border-color: var(--vz-light);
+  }
+}
