@@ -1,17 +1,18 @@
 {# templates/app/todo/_component.html.twig #}
 {# @var task \App\Entity\Task #}
 
-<div class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 border-start-0 border-end-0">
+<div data-task-container data-task-id="{{ task.id }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 border-start-0 border-end-0">
     
-  {# 1. À gauche : Le cercle de statut (Cliquable pour plus tard via JS) #}
+  {# 1. À gauche : Le Checkbox Natif #}
   <div class="todo-check flex-shrink-0">
-    <a href="#" class="text-muted fs-20 text-decoration-none">
-      {% if task.isCompleted %}
-        <i class="ri-checkbox-circle-fill text-success"></i>
-      {% else %}
-        <i class="ri-checkbox-blank-circle-line"></i>
-      {% endif %}
-    </a>
+    <input 
+      type="checkbox" 
+      class="form-check-input fs-5" 
+      data-todo-completed-toggler 
+      data-task-id="{{ task.id }}" 
+      {{ task.isCompleted ? 'checked' : '' }}
+      style="cursor: pointer; margin-top: 0;"
+    >
   </div>
 
   {# 2. Au centre : Le contenu (Cliquable pour éditer) #}
@@ -30,7 +31,6 @@
       {% if task.dueDate %}
         <span class="text-muted" style="font-size: 12px;">
           <i class="ri-calendar-event-line align-bottom me-1"></i>
-          {# Utilisation du nouveau filtre Twig pour la date #}
           {{ task.dueDate|human_datetime }}
         </span>
       {% endif %}
@@ -46,12 +46,12 @@
 
   {# 3. À droite : L'épingle et le menu d'actions #}
   <div class="flex-shrink-0 d-flex align-items-center gap-2">
-    {# Le bouton épingler #}
+    {# Le bouton épingler (reste inchangé, géré par délégation globale) #}
     <a href="#" class="btn btn-sm btn-icon btn-ghost-secondary fs-18 {{ task.isPinned|default(false) ? 'text-warning' : 'text-muted' }}">
       <i class="ri-pushpin-2-{{ task.isPinned|default(false) ? 'fill' : 'line' }}"></i>
     </a>
     
-    {# Menu contextuel (Dropdown natif Bootstrap) #}
+    {# Menu contextuel #}
     <div class="dropdown">
       <button class="btn btn-sm btn-icon btn-ghost-secondary fs-16" type="button" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="ri-more-2-fill"></i>
@@ -65,6 +65,7 @@
         <li><hr class="dropdown-divider"></li>
         <li>
           <form action="{{ path('app_todo_delete', {'id': task.id}) }}" method="post" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ task.id) }}">
             <button type="submit" class="dropdown-item text-danger">
               <i class="ri-delete-bin-line align-bottom me-2"></i> Supprimer
             </button>

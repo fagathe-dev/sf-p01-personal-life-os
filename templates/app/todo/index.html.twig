@@ -23,18 +23,34 @@
       <div class="card-body p-3">
         <div class="row g-3">
           <div class="col-md-8">
-            <form action="{{ path('app_todo_create') }}" method="POST" id="quick-add-form">
-              <div class="search-box">
-                {# Attribut name ajouté pour pouvoir le lire dans le controller si besoin #}
-                <input type="text" name="quick_title" class="form-control bg-light border-light" placeholder="Ajouter une tâche... (Appuyez sur Entrée)" required>
-                <i class="ri-add-line search-icon"></i>
-              </div>
-            </form>
+            {{ form_start(quickAddForm, {'action': path('app_todo_manage'), 'attr': {'id': 'quick-add-form'}}) }}
+            <div class="search-box">
+              {{ form_widget(quickAddForm.title, {
+                'attr': {
+                  'class': 'form-control bg-light border-light',
+                  'placeholder': 'Ajouter une tâche... (Appuyez sur Entrée)',
+                  'autocomplete': 'off'
+                }
+              }) }}
+              <i class="ri-add-line search-icon"></i>
+            </div>
+          {{ form_end(quickAddForm) }}
           </div>
           <div class="col-md-4">
-            {# Note : Pour l'MVP, on simule un select simple. On le remplacera par un vrai champ FormType avec notre CustomSelector dans l'Issue 4 #}
-            <select class="form-select bg-light border-light js-dropdown-select" data-cds-mode="multiple-nullable" data-cds-placeholder="Filtrer par étiquettes...">
-              <option value="">Toutes les étiquettes</option>
+            <select class="form-select bg-light border-light" onchange="if(this.value) window.location.href=this.value;">
+              {# Option par défaut : "Toutes les étiquettes" #}
+              <option value="{{ path('app_todo_manage') }}" {{ currentTag is null ? 'selected' : '' }}>
+                Toutes les étiquettes
+              </option>
+              
+              {# Boucle sur les tags de l'utilisateur #}
+              {% for tag in userTags %}
+                <option 
+                  value="{{ path('app_todo_tag_tasks', {'id': tag.id}) }}" 
+                  {{ currentTag and currentTag.id == tag.id ? 'selected' : '' }}
+                >{{ tag.name }}</option>
+              {% endfor %}
+              
             </select>
           </div>
         </div>
@@ -79,4 +95,8 @@
       </div>
     </div>
   </div>
+{% endblock %}
+
+{% block js %}
+  <script src="{{ asset('js/pages/app/todo.js') }}"></script>
 {% endblock %}

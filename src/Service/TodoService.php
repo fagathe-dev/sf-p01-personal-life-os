@@ -2,8 +2,10 @@
 
 namespace App\Service;
 
+use App\Entity\Tag;
 use App\Entity\Task;
 use App\Entity\User;
+use App\Repository\TagRepository;
 use App\Repository\TaskRepository;
 use Fagathe\CorePhp\Breadcrumb\Breadcrumb;
 use Fagathe\CorePhp\Breadcrumb\BreadcrumbItem;
@@ -24,7 +26,50 @@ final class TodoService
         private readonly TaskRepository $repository,
         private readonly Security $security,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly TagRepository $tagRepository,
     ) {
+    }
+
+    /**
+     * Récupère tous les tags de l'utilisateur connecté
+     * * @return Tag[]
+     */
+    public function getCurrentUserTags(): array
+    {
+        $user = $this->getCurrentUser();
+        if (!$user) {
+            return [];
+        }
+
+        // On suppose que ton entité Tag a une relation 'owner' comme Task
+        return $this->tagRepository->findBy(['owner' => $user], ['name' => 'ASC']);
+    }
+
+    /**
+     * @param Tag $tag
+     * 
+     * @return array
+     */
+    public function getTasksByTag(Tag $tag): array
+    {
+        return $tag->getTasks()->toArray();
+    }
+
+    /**
+     * Prépare les données pour la page filtrée par Tag
+     */
+    public function tagTasks(Tag $tag): array
+    {
+        $tasks = $this->getSortedCurrentTasks($this->getTasksByTag($tag));
+
+        return [
+            'tasks' => $tasks,
+            'userTags' => $this->getCurrentUserTags(),
+            'breadcrumb' => $this->breadcrumb([
+                new BreadcrumbItem(name: 'Étiquette : ' . $tag->getName())
+            ]),
+            'currentTag' => $tag, // Le tag actif pour pré-sélectionner l'option
+        ];
     }
 
     /**
@@ -43,6 +88,19 @@ final class TodoService
     }
 
     /**
+     * Prépare les données pour la page principale (Toutes les tâches)
+     */
+    public function manage(): array
+    {
+        return [
+            'tasks' => $this->getSortedCurrentTasks(),
+            'userTags' => $this->getCurrentUserTags(),
+            'breadcrumb' => $this->breadcrumb(),
+            'currentTag' => null, // Permet à la vue de savoir qu'aucun filtre n'est actif
+        ];
+    }
+
+    /**
      * Sauvegarde une tâche (Création ou Mise à jour).
      * * Lors d'une création, assigne automatiquement l'utilisateur connecté comme propriétaire.
      * * @param Task  $task        La tâche à sauvegarder
@@ -51,7 +109,7 @@ final class TodoService
      */
     public function saveTask(Task $task, bool $isCreation = false): bool
     {
-        // try {
+        try {
             if ($isCreation) {
                 /** @var User $user */
                 $user = $this->security->getUser();
@@ -73,18 +131,67 @@ final class TodoService
             );
 
             return true;
-        // } catch (Throwable $th) {
-        //     $this->generateLog(
-        //         LoggerLevelEnum::Error,
-        //         [
-        //             'message' => 'Erreur lors de la sauvegarde de la tâche',
-        //             'task_title' => $task->getTitle(),
-        //             'error' => $th->getMessage()
-        //         ],
-        //         ['action' => 'task.save.error']
-        //     );
-        //     return false;
-        // }
+        } catch (Throwable $th) {
+            $this->generateLog(
+                LoggerLevelEnum::Error,
+                [
+                    'message' => 'Erreur lors de la sauvegarde de la tâche',
+                    'task_title' => $task->getTitle(),
+                    'error' => $th->getMessage()
+                ],
+                ['action' => 'task.save.error']
+            );
+            return false;
+        }
+    }
+
+    /**
+     * Récupère les tâches de l'utilisateur connecté avec un tri intelligent :
+     * 1. Les tâches actives triées par urgence (échéance la plus proche).
+     * 2. Les tâches terminées reléguées à la fin.
+     * @param ?array $tasks Un tableau de tâches à trier (optionnel, sinon tri les tâches de l'utilisateur connecté)
+     * 
+     * @return Task[]
+     */
+    public function getSortedCurrentTasks(?array $tasks = null): array
+    {
+        $tasks = $tasks ?? $this->getCurrentUserTasks();
+
+        // 1. On sépare les tâches actives des tâches terminées
+        $activeTasks = array_filter($tasks, fn(Task $task) => !$task->isCompleted());
+        $completedTasks = array_filter($tasks, fn(Task $task) => $task->isCompleted());
+
+        // 2. On trie UNIQUEMENT les tâches actives par échéance
+        usort($activeTasks, function (Task $a, Task $b) {
+            $dateA = $a->getDueDate();
+            $dateB = $b->getDueDate();
+
+            if ($dateA && $dateB) {
+                return $dateA <=> $dateB; // Du plus urgent au plus lointain
+            }
+
+            if ($dateA)
+                return -1;
+            if ($dateB)
+                return 1;
+
+            if (method_exists($a, 'getCreatedAt') && method_exists($b, 'getCreatedAt')) {
+                return $b->getCreatedAt() <=> $a->getCreatedAt();
+            }
+
+            return 0;
+        });
+
+        // 3. Optionnel : On trie les tâches terminées par date de création (les plus récentes en premier)
+        usort($completedTasks, function (Task $a, Task $b) {
+            if (method_exists($a, 'getCreatedAt') && method_exists($b, 'getCreatedAt')) {
+                return $b->getCreatedAt() <=> $a->getCreatedAt();
+            }
+            return 0;
+        });
+
+        // 4. On fusionne les deux tableaux (Actives d'abord, Terminées ensuite)
+        return array_merge($activeTasks, $completedTasks);
     }
 
     /**
@@ -170,7 +277,7 @@ final class TodoService
     public function breadcrumb(array $items = []): Breadcrumb
     {
         return new Breadcrumb([
-            new BreadcrumbItem(name: 'Todo List', link: $this->urlGenerator->generate('app_todo_index')),
+            new BreadcrumbItem(name: 'Todo List', link: $this->urlGenerator->generate('app_todo_manage')),
             ...$items
         ]);
     }

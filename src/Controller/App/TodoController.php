@@ -2,11 +2,14 @@
 
 namespace App\Controller\App;
 
+use App\Entity\Tag;
 use App\Entity\Task;
 use App\Enum\Task\TodoDueDateEnum;
+use App\Form\App\TodoQuickAddType;
 use App\Form\App\TodoType;
 use App\Service\TodoService;
 use Fagathe\CorePhp\Breadcrumb\BreadcrumbItem;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,15 +24,51 @@ final class TodoController extends AbstractController
     }
 
     # Liste des tâches de l'utilisateur connecté
-    #[Route(path: '', name: 'index', methods: ['GET'])]
-    public function index(): Response
+    #[Route(path: '', name: 'manage', methods: ['GET', 'POST'])] // 👈 Renommé en 'manage'
+    public function manage(Request $request): Response
     {
-        // On utilise la méthode de ton service qui filtre déjà par l'utilisateur connecté
-        $tasks = $this->todoService->getCurrentUserTasks();
+        $task = new Task();
+        $quickAddForm = $this->createForm(TodoQuickAddType::class, $task);
+        $quickAddForm->handleRequest($request);
 
-        $breadcrumb = $this->todoService->breadcrumb();
+        if ($quickAddForm->isSubmitted() && $quickAddForm->isValid()) {
+            if ($this->todoService->saveTask($task, true)) {
+                $this->addFlash('success', 'Tâche ajoutée rapidement !');
+                return $this->redirectToRoute('app_todo_manage'); // 👈 Redirection vers manage
+            }
+            $this->addFlash('danger', 'Erreur lors de l\'ajout de la tâche.');
+        }
 
-        return $this->render('app/todo/index.html.twig', compact('tasks', 'breadcrumb'));
+        // On récupère toutes les variables d'un coup !
+        $data = $this->todoService->manage();
+        $data['quickAddForm'] = $quickAddForm->createView();
+
+        return $this->render('app/todo/index.html.twig', $data);
+    }
+
+    #[Route(path: '/tag/{id}', name: 'tag_tasks', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
+    public function tagTasks(#[MapEntity(mapping: ['id' => 'id'])] Tag $tag, Request $request): Response
+    {
+        $task = new Task();
+        $quickAddForm = $this->createForm(TodoQuickAddType::class, $task);
+        $quickAddForm->handleRequest($request);
+
+        if ($quickAddForm->isSubmitted() && $quickAddForm->isValid()) {
+            $task->addTag($tag); // On pré-associe le tag actif à la nouvelle tâche
+
+            if ($this->todoService->saveTask($task, true)) {
+                $this->addFlash('success', 'Tâche ajoutée avec l\'étiquette !');
+                // Redirection vers la page du tag pour rester dans le contexte
+                return $this->redirectToRoute('app_todo_tag_tasks', ['id' => $tag->getId()]);
+            }
+            $this->addFlash('danger', 'Erreur lors de l\'ajout de la tâche.');
+        }
+
+        // On récupère les données filtrées
+        $data = $this->todoService->tagTasks($tag);
+        $data['quickAddForm'] = $quickAddForm->createView();
+
+        return $this->render('app/todo/index.html.twig', $data);
     }
 
     # Page de création d'une Todo avec TodoType
@@ -53,7 +92,7 @@ final class TodoController extends AbstractController
 
             if ($this->todoService->saveTask($task, true)) {
                 $this->addFlash('success', 'Tâche créée avec succès.');
-                return $this->redirectToRoute('app_todo_index');
+                return $this->redirectToRoute('app_todo_manage');
             }
 
             $this->addFlash('danger', 'Une erreur est survenue lors de la création de la tâche.');
@@ -87,7 +126,7 @@ final class TodoController extends AbstractController
 
             if ($this->todoService->saveTask($task, false)) {
                 $this->addFlash('success', 'Tâche mise à jour avec succès.');
-                return $this->redirectToRoute('app_todo_index');
+                return $this->redirectToRoute('app_todo_manage');
             }
 
             $this->addFlash('danger', 'Une erreur est survenue lors de la mise à jour de la tâche.');
@@ -102,23 +141,28 @@ final class TodoController extends AbstractController
 
     # Page de suppression d'une Todo avec confirmation (méthode POST)
     #[Route(path: '/delete/{id}', name: 'delete', methods: ['POST'], requirements: ['id' => '\d+'])]
-    public function delete(Request $request, Task $task): Response
+    public function delete(Request $request, #[MapEntity(mapping: ['id' => 'id'])] Task $task): Response
     {
-        // Sécurité
+        // Sécurité : On s'assure que l'utilisateur est bien le propriétaire
         if ($task->getOwner() !== $this->getUser()) {
             throw $this->createAccessDeniedException('Vous n\'avez pas le droit de supprimer cette tâche.');
         }
 
-        // Optionnel mais recommandé en production : vérifier le token CSRF
-        // $token = $request->request->get('_token');
-        // if ($this->isCsrfTokenValid('delete'.$task->getId(), $token)) { ... }
+        // 🔴 Vérification du token CSRF 🔴
+        $token = $request->request->get('_token');
 
-        if ($this->todoService->deleteTask($task)) {
-            $this->addFlash('success', 'Tâche supprimée avec succès.');
+        if ($this->isCsrfTokenValid('delete' . $task->getId(), $token)) {
+            // Le jeton est valide, on procède à la suppression
+            if ($this->todoService->deleteTask($task)) {
+                $this->addFlash('success', 'Tâche supprimée avec succès.');
+            } else {
+                $this->addFlash('danger', 'Une erreur est survenue lors de la suppression.');
+            }
         } else {
-            $this->addFlash('danger', 'Une erreur est survenue lors de la suppression.');
+            // Le jeton est invalide (Tentative de hack ou session expirée)
+            $this->addFlash('danger', 'Action non autorisée (Jeton de sécurité invalide).');
         }
 
-        return $this->redirectToRoute('app_todo_index');
+        return $this->redirectToRoute('app_todo_manage');
     }
 }
