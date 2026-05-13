@@ -1,0 +1,22 @@
+{# templates/app/todo/create.html.twig #}
+{% extends 'layouts/dashboard.html.twig' %}
+
+{% block title %}Nouvelle Tâche{% endblock %}
+
+{% block content %}
+  <div class="container-fluid py-4" style="max-width: 800px;">
+    <div class="d-flex align-items-center mb-4">
+      <h1 class="h3 mb-0">Créer une tâche</h1>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        {{ include('app/todo/_form.html.twig') }}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script src="{{ asset('js/pages/app/todo.js') }}"></script>
+{% endblock %}

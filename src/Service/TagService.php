@@ -154,6 +154,7 @@ final class TagService
 
         return $this->getUserTags($user);
     }
+
     /**
      * Génère le fil d'Ariane pour la gestion des tags.
      * @param BreadcrumbItem[] $items Les éléments du fil d'Ariane

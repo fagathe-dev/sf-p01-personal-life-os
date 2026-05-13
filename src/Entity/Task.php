@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
 class Task
@@ -19,6 +20,7 @@ class Task
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank()]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -40,7 +42,7 @@ class Task
     private ?\DateTimeImmutable $updated_at = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTime $due_date = null;
+    private ?\DateTimeImmutable $due_date = null;
 
     #[ORM\Column(length: 30, nullable: true, enumType: TaskPriorityEnum::class, options: ["default" => TaskPriorityEnum::Low->value])]
     private TaskPriorityEnum|string|null $priority = null;
@@ -57,6 +59,9 @@ class Task
      */
     #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'tasks')]
     private Collection $tags;
+
+    #[ORM\Column(nullable: true, options: ["default" => false])]
+    private ?bool $is_pinned = null;
 
     public function __construct()
     {
@@ -116,6 +121,13 @@ class Task
         return $this;
     }
 
+    public function toggleCompleted(): static
+    {
+        $this->is_completed = !$this->is_completed;
+
+        return $this;
+    }
+
     public function getCompletedAt(): ?\DateTimeImmutable
     {
         return $this->completed_at;
@@ -152,12 +164,12 @@ class Task
         return $this;
     }
 
-    public function getDueDate(): ?\DateTime
+    public function getDueDate(): ?\DateTimeImmutable
     {
         return $this->due_date;
     }
 
-    public function setDueDate(?\DateTime $due_date): static
+    public function setDueDate(?\DateTimeImmutable $due_date): static
     {
         $this->due_date = $due_date;
 
@@ -228,6 +240,25 @@ class Task
     public function removeTag(Tag $tag): static
     {
         $this->tags->removeElement($tag);
+
+        return $this;
+    }
+
+    public function isPinned(): ?bool
+    {
+        return $this->is_pinned;
+    }
+
+    public function setIsPinned(?bool $is_pinned): static
+    {
+        $this->is_pinned = $is_pinned;
+
+        return $this;
+    }
+
+    public function togglePinned(): static
+    {
+        $this->is_pinned = !$this->is_pinned;
 
         return $this;
     }
