@@ -38,6 +38,10 @@ class TagType extends AbstractType
                 'label' => 'Enregistrer',
                 'attr' => ['type' => 'submit', 'class' => 'btn btn-primary']
             ])
+            ->add('save', SubmitType::class, [
+                'label' => 'Enregistrer',
+                'attr' => ['class' => 'btn btn-primary'],
+            ])
         ;
     }
 

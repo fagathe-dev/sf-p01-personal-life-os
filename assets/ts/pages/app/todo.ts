@@ -14,9 +14,9 @@ document.addEventListener('DOMContentLoaded', (): void => {
     new CustomSelector(priorityContainer, { mode, placeholder });
   }
 
-  const tagsContainer = $<HTMLElement>('[data-input-id="todo_tags"]') as HTMLElement | null;
+  const tagsContainer = $<HTMLElement>('[data-input-id="todo_tag"]') as HTMLElement | null;
   if (tagsContainer) {
-    const mode = (tagsContainer.getAttribute('data-cds-mode') as any) || 'multiple-nullable';
+    const mode = (tagsContainer.getAttribute('data-cds-mode') as any) || 'single-nullable';
     const placeholder = tagsContainer.getAttribute('data-cds-placeholder') || 'Ajouter des étiquettes...';
     new CustomSelector(tagsContainer, { mode, placeholder });
   }

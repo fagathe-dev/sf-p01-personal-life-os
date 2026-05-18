@@ -3,15 +3,15 @@
 namespace App\Entity;
 
 use App\Enum\ContentStateEnum;
+use App\Enum\Note\NoteColorEnum;
 use App\Repository\NoteRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: NoteRepository::class)]
+#[ORM\Index(name: 'idx_ft_note', columns: ['title', 'content'], flags: ['fulltext'])]
 class Note extends AbstractTextEntry
 {
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 160, nullable: true)]
     private ?string $title = null;
 
     #[ORM\Column(length: 30, enumType: ContentStateEnum::class)]
@@ -22,14 +22,19 @@ class Note extends AbstractTextEntry
     private ?User $owner = null;
 
     /**
-     * @var Collection<int, Tag>
+     * @var Tag|null
      */
-    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'notes')]
-    private Collection $tags;
+    #[ORM\ManyToOne(targetEntity: Tag::class, inversedBy: 'notes', cascade: ['persist', 'remove'])]
+    private ?Tag $tag = null;
+
+    #[ORM\Column(length: 30, enumType: NoteColorEnum::class)]
+    private NoteColorEnum|string|null $color = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $deleted_at = null;
 
     public function __construct()
     {
-        $this->tags = new ArrayCollection();
     }
 
     public function getTitle(): ?string
@@ -73,25 +78,49 @@ class Note extends AbstractTextEntry
     }
 
     /**
-     * @return Collection<int, Tag>
+     * @return Tag|null
      */
-    public function getTags(): Collection
+    public function getTag(): ?Tag
     {
-        return $this->tags;
+        return $this->tag;
     }
 
-    public function addTag(Tag $tag): static
+    /**
+     * @param Tag|null $tag
+     * 
+     * @return static
+     */
+    public function setTag(?Tag $tag = null): static
     {
-        if (!$this->tags->contains($tag)) {
-            $this->tags->add($tag);
-        }
+        $this->tag = $tag;
 
         return $this;
     }
 
-    public function removeTag(Tag $tag): static
+    public function getColor(): ?NoteColorEnum
     {
-        $this->tags->removeElement($tag);
+        return $this->color;
+    }
+
+    public function setColor(NoteColorEnum|string|null $color): static
+    {
+        if (is_string($color)) {
+            $color = NoteColorEnum::tryFrom($color);
+        }
+
+        $this->color = $color;
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deleted_at;
+    }
+
+    public function setDeletedAt(?\DateTimeImmutable $deleted_at): static
+    {
+        $this->deleted_at = $deleted_at;
 
         return $this;
     }

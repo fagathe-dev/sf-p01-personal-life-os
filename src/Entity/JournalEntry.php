@@ -2,19 +2,21 @@
 
 namespace App\Entity;
 
+use App\Enum\MoodEnum;
 use App\Repository\JournalEntryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: JournalEntryRepository::class)]
+#[ORM\Index(name: 'idx_ft_note', columns: ['title', 'content'], flags: ['fulltext'])]
 class JournalEntry extends AbstractTextEntry
 {
     #[ORM\Column]
     private ?\DateTimeImmutable $entryDate = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $mood = null;
+    #[ORM\Column(length: 50, nullable: true, enumType: MoodEnum::class)]
+    private MoodEnum|string|null $mood = null;
 
     #[ORM\ManyToOne(inversedBy: 'entries')]
     #[ORM\JoinColumn(nullable: false)]
@@ -28,6 +30,9 @@ class JournalEntry extends AbstractTextEntry
      */
     #[ORM\OneToMany(targetEntity: JournalMedia::class, mappedBy: 'journalEntry', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $medias;
+
+    #[ORM\Column(length: 160, nullable: true)]
+    private ?string $title = null;
 
     public function __construct()
     {
@@ -46,13 +51,17 @@ class JournalEntry extends AbstractTextEntry
         return $this;
     }
 
-    public function getMood(): ?string
+    public function getMood(): MoodEnum|string|null
     {
         return $this->mood;
     }
 
-    public function setMood(?string $mood): static
+    public function setMood(MoodEnum|string|null $mood): static
     {
+        if (is_string($mood)) {
+            $mood = MoodEnum::tryFrom($mood);
+        }
+
         $this->mood = $mood;
 
         return $this;
@@ -107,6 +116,18 @@ class JournalEntry extends AbstractTextEntry
                 $media->setJournalEntry(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): static
+    {
+        $this->title = $title;
 
         return $this;
     }

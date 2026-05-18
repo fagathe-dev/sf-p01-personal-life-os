@@ -1,0 +1,74 @@
+{# templates/app/note/index.html.twig #}
+{% extends 'layouts/dashboard.html.twig' %}
+
+{% block title %}Mes Notes{% endblock %}
+
+{% block content %}
+  <div class="container-fluid py-4" style="max-width: 1000px;">
+    
+    {# En-tête avec bouton d'action principal #}
+    <div class="row mb-4 align-items-center">
+      <div class="col">
+        <h1 class="h3 mb-0 text-gray-800">Mes Notes</h1>
+      </div>
+      <div class="col-auto">
+        <a href="{{ path('app_note_create') }}" class="btn btn-primary shadow-sm">
+          <i class="ri-add-line align-middle me-1"></i> Nouvelle note
+        </a>
+      </div>
+    </div>
+
+    {# Inclusion du formulaire de filtres centralisé #}
+    {% include 'app/note/_filter-form.html.twig' %}
+
+    {# Logique de séparation des notes (Épinglées vs Autres) #}
+    {% set pinned_notes = notes|filter(n => n.isPinned) %}
+    {% set unpinned_notes = notes|filter(n => not n.isPinned) %}
+
+    <div class="note-content">
+      
+      {# --- SECTION : Notes Épinglées --- #}
+      {% if pinned_notes|length > 0 %}
+        <h6 class="text-muted text-uppercase fs-12 fw-semibold mb-3 ps-1">Épinglées</h6>
+        
+        <section id="pinned-note-lists" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+          {% for note in pinned_notes %}
+            <div class="col">
+              {% include 'app/note/_component.html.twig' with {'note': note} %}
+            </div>
+          {% endfor %}
+        </section>
+      {% endif %}
+
+      {# --- SECTION : Autres Notes --- #}
+      <h6 class="text-muted text-uppercase fs-12 fw-semibold mb-3 ps-1 {{ pinned_notes|length > 0 ? '' : 'd-none' }}">Autres notes</h6>
+      
+      <section id="note-lists" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for note in unpinned_notes %}
+          <div class="col">
+            {% include 'app/note/_component.html.twig' with {'note': note} %}
+          </div>
+        {% else %}
+          {# État vide si aucune note (ni normale, ni épinglée) #}
+          {% if pinned_notes|length == 0 %}
+            <div class="col-12">
+              <div class="card border-0 shadow-sm text-center text-muted py-5">
+                <i class="ri-sticky-note-line display-4 d-block mb-3 opacity-50"></i>
+                {% if app.request.query.get('q') or app.request.query.get('t') or app.request.query.get('c') %}
+                   Aucune note ne correspond à vos filtres actuels.
+                {% else %}
+                   Votre espace de notes est vide. Commencez par créer votre première note !
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </section>
+
+    </div>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script src="{{ asset('js/pages/app/note.js') }}"></script>
+{% endblock %}

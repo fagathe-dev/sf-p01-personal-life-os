@@ -55,17 +55,16 @@ class Task
     private ?User $owner = null;
 
     /**
-     * @var Collection<int, Tag>
+     * @var Tag|null
      */
-    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'tasks')]
-    private Collection $tags;
+    #[ORM\ManyToOne(targetEntity: Tag::class, inversedBy: 'tasks')]
+    private ?Tag $tag = null;
 
     #[ORM\Column(nullable: true, options: ["default" => false])]
     private ?bool $is_pinned = null;
 
     public function __construct()
     {
-        $this->tags = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -221,28 +220,25 @@ class Task
     }
 
     /**
-     * @return Collection<int, Tag>
+     * @return Tag|null
      */
-    public function getTags(): Collection
+    public function getTag(): ?Tag
     {
-        return $this->tags;
+        return $this->tag;
     }
 
-    public function addTag(Tag $tag): static
+    /**
+     * @param Tag|null $tag
+     * 
+     * @return static
+     */
+    public function setTag(?Tag $tag): static
     {
-        if (!$this->tags->contains($tag)) {
-            $this->tags->add($tag);
-        }
+        $this->tag = $tag;
 
         return $this;
     }
 
-    public function removeTag(Tag $tag): static
-    {
-        $this->tags->removeElement($tag);
-
-        return $this;
-    }
 
     public function isPinned(): ?bool
     {

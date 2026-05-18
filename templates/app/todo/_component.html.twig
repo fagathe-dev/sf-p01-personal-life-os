@@ -29,18 +29,15 @@
     {# Métadonnées : Date et Tags #}
     <div class="d-flex flex-wrap gap-2 align-items-center mt-1">
       {% if task.dueDate %}
-        <span class="text-muted" style="font-size: 12px;">
-          <i class="ri-calendar-event-line align-bottom me-1"></i>
-          {{ task.dueDate|human_datetime }}
-        </span>
+        {{ task.dueDate|todo_due_date_badge }}
       {% endif %}
         
-      {% for tag in task.tags %}
+      {% if task.tag %}
         <span class="badge border border-light text-body d-flex align-items-center gap-1" style="font-size: 11px; font-weight: normal;">
-          <span class="rounded-circle d-inline-block" style="width: 8px; height: 8px; background-color: var(--vz-{{ tag.color.value|default('primary') }});"></span>
-          {{ tag.name|default('Tag') }}
+          <span class="rounded-circle d-inline-block" style="width: 8px; height: 8px; background-color: var(--vz-{{ task.tag.color.value|default('primary') }});"></span>
+          {{ task.tag.name|default('Tag') }}
         </span>
-      {% endfor %}
+      {% endif %}
     </div>
   </div>
 

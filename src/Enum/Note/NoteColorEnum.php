@@ -1,19 +1,16 @@
 <?php
 
-namespace App\Enum;
-enum TagColorEnum: string
+namespace App\Enum\Note;
+enum NoteColorEnum: string
 {
-    case Blue = 'blue';
-    case Indigo = 'indigo';
-    case Purple = 'purple';
-    case Pink = 'pink';
-    case Red = 'red';
-    case Orange = 'orange';
-    case Yellow = 'yellow';
-    case Green = 'green';
-    case Teal = 'teal';
-    case Cyan = 'cyan';
+    case Danger = 'danger';
     case Dark = 'dark';
+    case Info = 'info';
+    case Light = 'light';
+    case Primary = 'primary';
+    case Secondary = 'secondary';
+    case Success = 'success';
+    case Warning = 'warning';
 
     /**
      * @return array<string, string>
