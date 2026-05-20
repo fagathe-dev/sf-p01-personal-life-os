@@ -22,6 +22,11 @@ class DateExtension extends AbstractExtension
         ];
     }
 
+    /**
+     * @param DateTimeInterface|null $dateTime
+     * 
+     * @return string|null
+     */
     public function formatAgo(?DateTimeInterface $dateTime): ?string
     {
         if (!$dateTime) {
@@ -35,6 +40,11 @@ class DateExtension extends AbstractExtension
         return $this->ago($immutable);
     }
 
+    /**
+     * @param DateTimeInterface|null $dateTime
+     * 
+     * @return string|null
+     */
     public function formatHumanDatetime(?DateTimeInterface $dateTime): ?string
     {
         if (!$dateTime) {

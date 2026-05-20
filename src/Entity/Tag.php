@@ -38,13 +38,13 @@ class Tag
     /**
      * @var Collection<int, Note>
      */
-    #[ORM\ManyToMany(targetEntity: Note::class, mappedBy: 'tags')]
+    #[ORM\OneToMany(targetEntity: Note::class, mappedBy: 'tag')]
     private Collection $notes;
 
     /**
      * @var Collection<int, Task>
      */
-    #[ORM\ManyToMany(targetEntity: Task::class, mappedBy: 'tags')]
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'tag')]
     private Collection $tasks;
 
     public function __construct()
@@ -142,49 +142,11 @@ class Tag
         return $this->notes;
     }
 
-    public function addNote(Note $note): static
-    {
-        if (!$this->notes->contains($note)) {
-            $this->notes->add($note);
-            $note->addTag($this);
-        }
-
-        return $this;
-    }
-
-    public function removeNote(Note $note): static
-    {
-        if ($this->notes->removeElement($note)) {
-            $note->removeTag($this);
-        }
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Task>
      */
     public function getTasks(): Collection
     {
         return $this->tasks;
-    }
-
-    public function addTask(Task $task): static
-    {
-        if (!$this->tasks->contains($task)) {
-            $this->tasks->add($task);
-            $task->addTag($this);
-        }
-
-        return $this;
-    }
-
-    public function removeTask(Task $task): static
-    {
-        if ($this->tasks->removeElement($task)) {
-            $task->removeTag($this);
-        }
-
-        return $this;
     }
 }

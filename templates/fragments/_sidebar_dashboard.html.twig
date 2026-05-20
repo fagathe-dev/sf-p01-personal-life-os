@@ -17,15 +17,21 @@
             <div id="two-column-menu"></div>
             <ul class="navbar-nav" id="navbar-nav">
               <li class="nav-item">
-                <a class="nav-link menu-link" href="{{ url('admin_log_index') }}">
+                <a class="nav-link menu-link" href="{{ url('app_todo_manage') }}">
+                  <i class="ri-todo-line"></i>
+                  <span>Todo</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link menu-link" href="{{ url('app_note_manage') }}">
                   <i class="ri-sticky-note-line"></i>
                   <span>Notes</span>
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link menu-link" href="{{ url('app_todo_manage') }}">
-                  <i class="ri-todo-line"></i>
-                  <span>Todo</span>
+                <a class="nav-link menu-link" href="{{ url('admin_log_index') }}">
+                  <i class="ri-cloud-line"></i>
+                  <span>Drive</span>
                 </a>
               </li>
               <li class="nav-item">

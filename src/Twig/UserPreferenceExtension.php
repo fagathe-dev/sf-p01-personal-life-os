@@ -13,6 +13,9 @@ class UserPreferenceExtension extends AbstractExtension
     {
     }
 
+    /**
+     * @return array
+     */
     public function getFunctions(): array
     {
         return [
@@ -20,6 +23,13 @@ class UserPreferenceExtension extends AbstractExtension
         ];
     }
 
+    /**
+     * @param string $preference
+     * @param mixed|null $default
+     * @param User|null $user
+     * 
+     * @return mixed
+     */
     public function getPreference(string $preference, mixed $default = null, ?User $user = null): mixed
     {
         if ($user === null) {
@@ -33,6 +43,9 @@ class UserPreferenceExtension extends AbstractExtension
         return $user->getPreference($preference, $default);
     }
 
+    /**
+     * @return User|null
+     */
     private function getUser(): ?User
     {
         $user = $this->security->getUser();

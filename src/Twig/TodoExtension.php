@@ -3,19 +3,30 @@
 namespace App\Twig;
 
 use App\Enum\Task\TaskPriorityEnum;
+use DateTimeImmutable;
+use DateTimeInterface;
+use Fagathe\CorePhp\Trait\DatetimeTrait;
+use Fagathe\CorePhp\Enum\HumanDueDateEnum;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
 class TodoExtension extends AbstractExtension
 {
+    use DatetimeTrait;
     public function getFilters(): array
     {
         return [
             // is_safe permet de renvoyer du HTML interprétable
             new TwigFilter('todo_priority_badge', [$this, 'getPriorityBadge'], ['is_safe' => ['html']]),
+            new TwigFilter('todo_due_date_badge', [$this, 'getDueDateBadge'], ['is_safe' => ['html']]),
         ];
     }
 
+    /**
+     * @param TaskPriorityEnum|string|null $priority
+     * 
+     * @return string
+     */
     public function getPriorityBadge(TaskPriorityEnum|string|null $priority): string
     {
         if (!$priority) {
@@ -45,6 +56,37 @@ class TodoExtension extends AbstractExtension
             $color,
             $color,
             $label
+        );
+    }
+
+    /**
+     * @param DateTimeInterface|DateTimeImmutable|null $dueDate
+     * 
+     * @return string
+     */
+    public function getDueDateBadge(DateTimeInterface|DateTimeImmutable|null $dueDate): string
+    {
+        if (!$dueDate) {
+            return '';
+        }
+
+        $humanReadableDueDate = $this->formatHumanDueDate($dueDate);
+
+        $labelText = match ($humanReadableDueDate) {
+            HumanDueDateEnum::Later => \IntlDateFormatter::formatObject($dueDate, 'EEE d MMM', 'fr_FR'),
+            default => HumanDueDateEnum::label($humanReadableDueDate) ?? 'Inconnu',
+        };
+
+        $textColor = match ($humanReadableDueDate) {
+            HumanDueDateEnum::Overdue,HumanDueDateEnum::Today => 'danger',
+            HumanDueDateEnum::Tomorrow => 'warning',
+            default => 'muted',
+        };
+
+        return sprintf(
+            '<span class="text-%s" style="font-size: 12px;"><i class="ri-calendar-event-line align-bottom me-1"></i>%s</span></span>',
+            $textColor,
+            $labelText
         );
     }
 }

@@ -26,7 +26,6 @@ use Fagathe\CorePhp\Trait\LoggerTrait;
 use Fagathe\CorePhp\Trait\PaginationTrait;
 use Fagathe\CorePhp\Trait\SessionFlashTrait;
 use Knp\Component\Pager\Pagination\PaginationInterface;
-use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -69,7 +68,6 @@ final class UserService
         private readonly EntityManagerInterface $entityManager,
         private readonly SerializerInterface $serializer,
         private readonly UrlGeneratorInterface $urlGenerator,
-        protected readonly PaginatorInterface $paginator,
         private readonly AccountConfirmationEmail $accountConfirmationEmail,
         private readonly AdminAccountCreatedEmail $adminAccountCreatedEmail,
         private readonly UserRequestService $userRequestService,
@@ -435,6 +433,9 @@ final class UserService
         ]);
     }
 
+    /**
+     * @return User|null
+     */
     public function getCurrentUser(): ?User
     {
         $user = $this->security->getUser();
@@ -446,6 +447,12 @@ final class UserService
         return null;
     }
 
+    /**
+     * @param User $user
+     * @param UploadedFile $file
+     * 
+     * @return UploadResult
+     */
     public function updateAvatar(User $user, UploadedFile $file): UploadResult
     {
         $this->uploaderValidationService
@@ -468,6 +475,11 @@ final class UserService
         return $result;
     }
 
+    /**
+     * @param User|null $user
+     * 
+     * @return void
+     */
     private function deleteAvatar(?User $user = null): void
     {
         $user = $user ?? $this->getCurrentUser();

@@ -16,6 +16,11 @@ class UserExtension extends AbstractExtension
         ];
     }
 
+    /**
+     * @param User $user
+     * 
+     * @return string
+     */
     public function getRoles(User $user): string
     {
         $roles = [];
@@ -26,6 +31,11 @@ class UserExtension extends AbstractExtension
         return join(', ', $roles);
     }
 
+    /**
+     * @param null|string|RoleEnum $role
+     * 
+     * @return string
+     */
     public function niceRole(null|string|RoleEnum $role): string
     {
         return RoleEnum::getRole($role);

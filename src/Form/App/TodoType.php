@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -97,13 +98,13 @@ class TodoType extends AbstractType
                     return $state ? TaskStateEnum::getMap($state) ?? $state->value : 'Aucun statut';
                 },
             ])
-            ->add('tags', EntityType::class, [
+            ->add('tag', EntityType::class, [
                 'label' => 'Étiquettes',
                 'class' => Tag::class,
                 // ⚠️ J'ai changé 'id' par 'name' (ou 'title' selon ton entité Tag)
                 // pour que le texte dans le dropdown soit lisible
                 'choice_label' => 'name',
-                'multiple' => true,
+                'multiple' => false,
                 'expanded' => false, // ⚠️ Requis : génère un <select> pour le CustomSelector
                 'required' => false,
                 'choice_attr' => function (Tag $tag) {
@@ -113,6 +114,11 @@ class TodoType extends AbstractType
                         'data-description' => $tag->getDescription()
                     ];
                 },
+            ])
+            ->add('save', SubmitType::class, [
+                'label' => '<i class="ri-save-3-line align-middle me-1"></i> Enregistrer',
+                'attr' => ['class' => 'btn btn-primary'],
+                'label_html' => true
             ])
         ;
     }
