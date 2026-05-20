@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', (): void => {
   // ACTION : TOGGLE COMPLETED (Via Checkbox)
   // ==========================================
   const completedTogglerList = $('[data-todo-completed-toggler]', true) as NodeListOf<HTMLInputElement>;
-  console.log(`completedTogglerList initialized with ${(completedTogglerList as NodeListOf<HTMLInputElement>)?.length} items.`);
   
   if (completedTogglerList) {
     (completedTogglerList as NodeListOf<HTMLInputElement>).forEach((checkbox) => {

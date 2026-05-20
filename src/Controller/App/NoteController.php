@@ -50,7 +50,7 @@ final class NoteController extends AbstractController
         $quickAddForm->handleRequest($request);
 
         if ($quickAddForm->isSubmitted() && $quickAddForm->isValid()) {
-            $note->addTag($tag); // On pré-associe le tag actif à la nouvelle note
+            $note->setTag($tag); // On pré-associe le tag actif à la nouvelle note
 
             if ($this->noteService->saveNote($note, true)) {
                 $this->addFlash('success', 'Note ajoutée avec l\'étiquette !');
@@ -61,8 +61,7 @@ final class NoteController extends AbstractController
         }
 
         // On récupère les données filtrées
-        $data = $this->noteService->tagNotes($tag);
-        $data['quickAddForm'] = $quickAddForm->createView();
+        $data = [...$this->noteService->tagNotes($tag), 'quickAddForm' => $quickAddForm->createView()];
 
         return $this->render('app/note/index.html.twig', $data);
     }

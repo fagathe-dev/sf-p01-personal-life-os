@@ -50,52 +50,20 @@ final class NoteQuickActionsController extends AbstractController
         return new JsonResponse(['success' => false], 500);
     }
 
-    #[Route(path: '/{id}/toggle-pinned', name: 'toggle_pinned', methods: ['POST'])]
-    public function togglePinned(#[MapEntity(mapping: ['id' => 'id'])] Note $note): JsonResponse
-    {
-        # TODO: Adapter ce code au contexte des notes (et pas des tâches)
-        if ($note->getOwner() !== $this->getUser()) {
-            return new JsonResponse(['success' => false, 'error' => 'Accès refusé'], 403);
-        }
-
-        $task->togglePinned();
-        $this->todoService->saveTask($task, false);
-
-        return new JsonResponse([
-            'success' => true,
-            'is_pinned' => $task->isPinned()
-        ]);
-    }
-
-    #[Route(path: '/archive/{id}', name: 'archive', methods: ['POST'], requirements: ['id' => '\d+'])]
-    public function archive(#[MapEntity(mapping: ['id' => 'id'])] Note $note): JsonResponse
+    #[Route(path:'/{id}/{action}', name:'quick_actions', methods: ['PUT'], requirements: ['id' => '\d+', 'action' => 'pinned|archive|trash'])]
+    public function quickActions(#[MapEntity(mapping: ['id' => 'id'])] Note $note, string $action): JsonResponse
     {
         if ($note->getOwner() !== $this->getUser()) {
             return new JsonResponse(['success' => false, 'error' => 'Accès refusé'], 403);
         }
 
-        $note->toggleArchived();
-        $this->noteService->saveNote($note, false);
+        $response = $this->noteService->handleQuickAction($note, $action);
 
-        return new JsonResponse([
-            'success' => true,
-            'is_archived' => $note->isArchived()
-        ]);
-    }
-
-    #[Route(path: '/trash/{id}', name: 'trash', methods: ['POST'], requirements: ['id' => '\d+'])]
-    public function trash(#[MapEntity(mapping: ['id' => 'id'])] Note $note): JsonResponse
-    {
-        if ($note->getOwner() !== $this->getUser()) {
-            return new JsonResponse(['success' => false, 'error' => 'Accès refusé'], 403);
-        }
-
-        $note->toggleArchived();
-        $this->noteService->saveNote($note, false);
-
-        return new JsonResponse([
-            'success' => true,
-            'is_archived' => $note->isArchived()
-        ]);
-    }
+        return $this->json(
+            $response->data,
+            $response->status,
+            $response->headers,
+            ['groups' => 'note_quick_action'] // 🔥 ASTUCE : On utilise un groupe de sérialisation pour ne renvoyer que les données nécessaires à la mise à jour du frontend
+        );
+    }    
 }

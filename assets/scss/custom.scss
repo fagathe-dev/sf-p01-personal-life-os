@@ -74,3 +74,54 @@ $custom-colors:
     border-color: var(--vz-light);
   }
 }
+
+// assets/styles/components/_note.scss (ou dans ton fichier CSS principal)
+
+.note-card {
+  transition: all 0.2s ease-in-out;
+  border-radius: 0.75rem; // Coins légèrement plus arrondis pour un côté moderne
+
+  /* État par défaut : on masque l'épingle et les actions */
+  .pin-button,
+  .quick-actions-dropdown {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.2s ease-in-out,
+      visibility 0.2s ease-in-out;
+  }
+
+  /* Exception : Si la note est DÉJÀ épinglée, on affiche l'icône en permanence */
+  .pin-button {
+    i.ri-pushpin-2-fill {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  /* Comportement au survol de la carte entière */
+  &:hover {
+    /* Effet de soulèvement (élévation) */
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08) !important;
+    transform: translateY(-2px);
+
+    /* On révèle les boutons d'action */
+    .pin-button,
+    .quick-actions-dropdown {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+  .note-content-preview {
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* Limite l'affichage à 4 lignes maximum */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    /* Optionnel : Supprime la marge du dernier paragraphe généré par le Markdown */
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+}

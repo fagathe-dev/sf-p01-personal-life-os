@@ -27,7 +27,7 @@ class Note extends AbstractTextEntry
     #[ORM\ManyToOne(targetEntity: Tag::class, inversedBy: 'notes', cascade: ['persist', 'remove'])]
     private ?Tag $tag = null;
 
-    #[ORM\Column(length: 30, enumType: NoteColorEnum::class)]
+    #[ORM\Column(length: 30, nullable: true, enumType: NoteColorEnum::class)]
     private NoteColorEnum|string|null $color = null;
 
     #[ORM\Column(nullable: true)]

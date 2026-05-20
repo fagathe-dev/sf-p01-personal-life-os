@@ -21,43 +21,33 @@ class NoteType extends AbstractType
     {
         $builder
             ->add('content', TextareaType::class, [
-                'label' => 'Titre',
+                'label' => 'Contenu',
                 'attr' => [
                     'placeholder' => 'Quoi de neuf ?',
                     'rows' => 12,
                 ],
-            ])
-            ->add('is_pinned', CheckboxType::class, [
-                'label' => 'Épingler la note',
-                'required' => false,
-                // Ces classes dépendent de ton framework CSS (ex: Bootstrap form-switch)
-                // 'attr' => ['class' => 'form-check-input'], 
-                // 'label_attr' => ['class' => 'form-check-label']
             ])
             ->add('title', TextType::class, [
                 'label' => 'Titre',
                 'attr' => ['placeholder' => 'Quoi de neuf ?']
             ])
             ->add('color', EnumType::class, [
-                // Appel direct de ta méthode
-                // 'choices' => TagColorEnum::choices(),
                 'class' => NoteColorEnum::class,
-                'expanded' => true,
+                'expanded' => true,  // 👈 Rendu sous forme de boutons radio pour nos pastilles
                 'multiple' => false,
                 'label' => false,
+                'required' => false, // 👈 Permet de ne pas avoir de couleur
+                'placeholder' => false, // 👈 Évite à Symfony de générer un bouton radio "Vide" inesthétique
             ])
-            ->add('tags', EntityType::class, [
-                'label' => 'Étiquettes',
+            ->add('tag', EntityType::class, [
+                'label' => 'Étiquette',
                 'class' => Tag::class,
-                // ⚠️ J'ai changé 'id' par 'name' (ou 'title' selon ton entité Tag)
-                // pour que le texte dans le dropdown soit lisible
                 'choice_label' => 'name',
-                'multiple' => true,
-                'expanded' => false, // ⚠️ Requis : génère un <select> pour le CustomSelector
+                'multiple' => false,
+                'expanded' => false, // 👈 CRUCIAL : Génère un <select> classique pour ton CustomSelector
                 'required' => false,
                 'choice_attr' => function (Tag $tag) {
                     return [
-                        // On suppose que getColor() retourne un Enum ou une string
                         'data-color' => $tag->getColor()?->value ?? $tag->getColor(),
                         'data-description' => $tag->getDescription()
                     ];

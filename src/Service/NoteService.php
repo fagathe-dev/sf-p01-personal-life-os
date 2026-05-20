@@ -5,11 +5,13 @@ namespace App\Service;
 use App\Entity\Note;
 use App\Entity\Tag;
 use App\Entity\User;
+use App\Enum\ContentStateEnum;
 use App\Repository\NoteRepository;
 use App\Repository\TagRepository;
 use Fagathe\CorePhp\Breadcrumb\Breadcrumb;
 use Fagathe\CorePhp\Breadcrumb\BreadcrumbItem;
 use Fagathe\CorePhp\Enum\LoggerLevelEnum;
+use Fagathe\CorePhp\Http\ResponseTrait;
 use Fagathe\CorePhp\Trait\DatetimeTrait;
 use Fagathe\CorePhp\Trait\LoggerTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -21,7 +23,7 @@ final class NoteService
 {
     # Service de gestion des notes (CRUD, validation, etc.)
 
-    use LoggerTrait, DatetimeTrait;
+    use LoggerTrait, DatetimeTrait, ResponseTrait;
 
     public function __construct(
         private readonly NoteRepository $repository,
@@ -82,7 +84,8 @@ final class NoteService
      */
     public function trashNote(Note $note): bool
     {
-        $note->setDeletedAt($this->now());
+        $note->setState(ContentStateEnum::Trash)
+            ->setDeletedAt($this->now());
         return $this->saveNote($note); // Ta méthode de sauvegarde existante
     }
 
@@ -93,8 +96,9 @@ final class NoteService
      */
     public function restoreNote(Note $note): bool
     {
-        $note->setDeletedAt(null);
-        return $this->saveNote($note);
+        $note->setState(ContentStateEnum::Open)
+            ->setDeletedAt(null);
+        return $this->saveNote($note, false);
     }
 
 
@@ -106,7 +110,7 @@ final class NoteService
     public function breadcrumb(array $items = []): Breadcrumb
     {
         return new Breadcrumb([
-            new BreadcrumbItem(name: 'Todo List', link: $this->urlGenerator->generate('app_todo_manage')),
+            new BreadcrumbItem(name: 'Notes', link: $this->urlGenerator->generate('app_note_manage')),
             ...$items
         ]);
     }
@@ -183,12 +187,95 @@ final class NoteService
      */
     public function manage(array $filters = []): array
     {
+        // On utilise la nouvelle méthode du repository avec les filtres
+        $currentUserNotes = $this->repository->findFilteredNotes($filters);
+
+        // On sépare les notes épinglées des autres pour un affichage différencié
+        [$pinnedNotes, $unpinnedNotes] = $this->filterPinnedNotes($currentUserNotes);
+
         return [
-            'notes' => $this->getCurrentUserNotes(),
+            'notes' => compact('pinnedNotes', 'unpinnedNotes'),
             'userTags' => $this->getCurrentUserTags(),
             'breadcrumb' => $this->breadcrumb(),
-            'currentTag' => null, // Permet à la vue de savoir qu'aucun filtre n'est actif
+            'currentTag' => null, // Permet à la vue de savoir qu'aucun filtre strict de navigation n'est actif
         ];
+    }
+
+    /**
+     * @param array $notes
+     * 
+     * @return array
+     */
+    private function filterPinnedNotes(array $notes): array
+    {
+        $pinned = [];
+        $unpinned = [];
+
+        foreach ($notes as $note) {
+            if ($note->isPinned()) {
+                $pinned[] = $note;
+            } else {
+                $unpinned[] = $note;
+            }
+        }
+
+        return [$pinned, $unpinned];
+    }
+
+    /**
+     * Centralise et traite les actions rapides (Archive, Trash, Pin) issues d'AJAX
+     * * @param Note $note
+     * @param string $action 'pinned'|'archive'|'trash'
+     * @return object Un objet contenant data, status, headers pour NoteQuickActionsController
+     */
+    public function handleQuickAction(Note $note, string $action): object
+    {
+        try {
+            switch ($action) {
+                case 'pinned':
+                    // On bascule l'état booléen d'épinglage
+                    $note->setIsPinned(!$note->isPinned());
+                    break;
+
+                case 'archive':
+                    // ⚠️ Attention à l'écriture "Archieved" présente dans l'Enum
+                    $note->setState(ContentStateEnum::Archieved);
+                    break;
+
+                case 'trash':
+                    $note->setState(ContentStateEnum::Trash) // On applique le soft delete avec l'horodatage courant du DatetimeTrait
+                        ->setDeletedAt($this->now());
+                    break;
+
+                default:
+                    return $this->sendJson(['success' => false, 'error' => 'Action non supportée'], 400);
+            }
+
+            // Sauvegarde via le repository
+            if ($this->saveNote($note, false)) {
+                return $this->sendJson([
+                    'success' => true,
+                    'id' => $note->getId(),
+                    'is_pinned' => $note->isPinned(),
+                    'state' => $note->getState()->value
+                ]);
+            }
+
+            return $this->sendJson(['success' => false, 'error' => 'Erreur lors de la sauvegarde'], 500);
+
+        } catch (Throwable $e) {
+            $this->generateLog(
+                LoggerLevelEnum::Error,
+                [
+                    'message' => 'Erreur lors de l\'action rapide sur la note',
+                    'note_id' => $note->getId(),
+                    'action' => $action,
+                    'error' => $e->getMessage()
+                ],
+                ['action' => 'note.quick_action.error']
+            );
+            return $this->sendJson(['success' => false, 'error' => 'Une erreur système est survenue'], 500);
+        }
     }
 
     /**
