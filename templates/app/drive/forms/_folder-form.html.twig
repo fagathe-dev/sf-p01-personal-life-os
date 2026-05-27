@@ -1,0 +1,22 @@
+<div id="modalFolderForm" class="modal fade" tabindex="-1" aria-labelledby="modalFolderFormLabel" aria-hidden="true" style="display: none;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalFolderFormLabel">Créer un dossier</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ url('ajax_drive_folder_add') }}" method="post">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="folderName" class="form-label">Nom du dossier</label>
+            <input type="text" name="name" id="folderName" class="form-control" placeholder="Nom du dossier" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary ">Enregistrer</button>
+        </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

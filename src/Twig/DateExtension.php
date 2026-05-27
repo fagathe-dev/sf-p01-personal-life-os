@@ -55,6 +55,6 @@ class DateExtension extends AbstractExtension
         $immutable = $dateTime instanceof DateTime ? $this->createFromMutable($dateTime) : $dateTime;
 
         // Appel direct à la méthode formatHumanDueDate() du DatetimeTrait
-        return $this->formatHumanDueDate($immutable);
+        return \IntlDateFormatter::formatObject($immutable, 'EEE d MMM', 'fr_FR');
     }
 }

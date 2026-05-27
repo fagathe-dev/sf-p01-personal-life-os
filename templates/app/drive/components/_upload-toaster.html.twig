@@ -1,0 +1,56 @@
+{# templates/app/drive/components/_upload-toaster.html.twig #}
+
+{# Conteneur fixe en bas à droite (masqué par défaut via d-none) #}
+<div id="drive-upload-toaster" class="position-fixed bottom-0 end-0 m-4 d-none" style="z-index: 1055; width: 360px;">
+  <div class="card shadow-lg border-0 rounded-3 mb-0">
+      
+    {# En-tête : Titre et actions (Réduire/Fermer) #}
+    <div class="card-header bg-light border-bottom-0 py-2 px-3 d-flex justify-content-between align-items-center rounded-top-3">
+      <span class="fw-semibold fs-14 text-body" id="upload-toaster-title">Importation...</span>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-icon text-muted shadow-none p-0" id="upload-toaster-minimize">
+          <i class="ri-arrow-down-s-line fs-5"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-icon text-muted shadow-none p-0" id="upload-toaster-close">
+          <i class="ri-close-line fs-5"></i>
+        </button>
+      </div>
+    </div>
+
+    {# Corps : Liste des fichiers avec scrollbar #}
+    <div class="card-body p-0" id="upload-toaster-list" style="max-height: 320px; overflow-y: auto;">
+    </div>
+  </div>
+</div>
+
+{# Le squelette HTML (Template) d'une ligne de fichier #}
+<template id="upload-item-template">
+  <div class="upload-item p-3 border-bottom bg-white">
+    <div class="d-flex align-items-center mb-1">
+      {# Conteneur de l'icône (PDF, Image, etc.) #}
+      <div class="flex-shrink-0 me-3 file-icon-wrapper">
+        <i class="ri-file-line text-muted fs-2"></i>
+      </div>
+      
+      {# Conteneur des infos et de la barre de progression #}
+      <div class="flex-grow-1 overflow-hidden">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-truncate fs-13 fw-medium text-body file-name">nom-fichier.ext</span>
+          
+          {# La zone de droite : Soit le %, soit le spinner, soit le check de succès #}
+          <div class="d-flex align-items-center gap-2">
+            <span class="fs-12 text-muted file-percentage">0%</span>
+            <span class="file-status-icon d-none">
+              <i class="ri-loader-4-line ri-spin text-primary"></i>
+            </span>
+          </div>
+        </div>
+        
+        {# Barre de progression Bootstrap très fine #}
+        <div class="progress" style="height: 4px;">
+          <div class="progress-bar bg-primary rounded" role="progressbar" style="width: 0%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

@@ -24,7 +24,6 @@ final class NoteController extends AbstractController
     }
 
     # Liste des notes de l'utilisateur connecté
-    # Liste des notes de l'utilisateur connecté
     #[Route(path: '', name: 'manage', methods: ['GET'])]
     public function manage(Request $request): Response
     {

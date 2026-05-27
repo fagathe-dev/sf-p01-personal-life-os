@@ -19,6 +19,9 @@ class DriveDocument extends AbstractFile
     #[ORM\ManyToOne(inversedBy: 'documents')]
     private ?Folder $folder = null;
 
+    #[ORM\ManyToOne(inversedBy: 'driveDocuments')]
+    private ?Tag $tag = null;
+
     public function getState(): ?ContentStateEnum
     {
         return $this->state;
@@ -55,6 +58,18 @@ class DriveDocument extends AbstractFile
     public function setFolder(?Folder $folder): static
     {
         $this->folder = $folder;
+
+        return $this;
+    }
+
+    public function getTag(): ?Tag
+    {
+        return $this->tag;
+    }
+
+    public function setTag(?Tag $tag): static
+    {
+        $this->tag = $tag;
 
         return $this;
     }

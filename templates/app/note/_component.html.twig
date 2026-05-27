@@ -19,7 +19,7 @@
       <h6 class="card-title fw-bold mb-2 pe-4">{{ note.title }}</h6>
     {% endif %}
 
-    <div class="card-text text-muted fs-14 note-content-preview" data-note-raw-content="{{ note.content|default('')|e('html_attr') }}">
+    <div class="card-text text-muted fs-14 note-content-preview" data-note-raw-content="{{ note.content|default('')|word_wrap(160)|e('html_attr') }}">
       {# Injecté par le script JS via convertMarkdownToHtml #}
     </div>
   </a>
@@ -43,19 +43,23 @@
         <i class="ri-more-2-fill fs-5"></i>
       </button>
       <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="font-size: 14px;">
-        <li>
-          {# 💡 Ajout des attributs data-action et data-id #}
-          <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-action="archive" data-id="{{ note.id }}">
-            <i class="ri-archive-line text-muted"></i> Archiver
-          </a>
-        </li>
-        <li><hr class="dropdown-divider"></li>
-        <li>
-          {# 💡 Ajout des attributs data-action et data-id #}
-          <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" data-action="trash" data-id="{{ note.id }}">
-            <i class="ri-delete-bin-line"></i> Corbeille
-          </a>
-        </li>
+        {% if note.state.value != 'open' %}
+          {# archive ou corbeille --- IGNORE --- #}
+        {% else %}  
+          <li>
+            {# 💡 Ajout des attributs data-action et data-id #}
+            <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-action="archive" data-id="{{ note.id }}">
+              <i class="ri-archive-line text-muted"></i> Archiver
+            </a>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            {# 💡 Ajout des attributs data-action et data-id #}
+            <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" data-action="trash" data-id="{{ note.id }}">
+              <i class="ri-delete-bin-line"></i> Corbeille
+            </a>
+          </li>
+        {% endif %}
       </ul>
     </div>
   </div>
