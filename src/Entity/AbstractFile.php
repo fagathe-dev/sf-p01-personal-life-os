@@ -16,9 +16,6 @@ abstract class AbstractFile
     #[ORM\Column(length: 255)]
     protected ?string $originalName = null;
 
-    #[ORM\Column(length: 255)]
-    protected ?string $fileName = null;
-
     #[ORM\Column(length: 255, nullable: true)]
     protected ?string $niceName = null;
 
@@ -59,18 +56,6 @@ abstract class AbstractFile
     public function setOriginalName(string $originalName): static
     {
         $this->originalName = $originalName;
-
-        return $this;
-    }
-
-    public function getFileName(): ?string
-    {
-        return $this->fileName;
-    }
-
-    public function setFileName(string $fileName): static
-    {
-        $this->fileName = $fileName;
 
         return $this;
     }
