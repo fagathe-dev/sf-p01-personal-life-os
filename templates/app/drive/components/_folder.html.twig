@@ -5,7 +5,6 @@
     <i class="ri-folder-2-fill align-bottom text-warning me-2 fs-5"></i> 
     <span class="item-name fw-medium">{{ folder.name }}</span>
   </th>
-  <!-- <td class="text-muted">--</td> {# La taille d'un dossier nécessite un calcul lourd, souvent omis #} -->
   <td>
     <span class="text-muted">
       {{ folder.updatedAt ? folder.updatedAt|human_datetime : folder.createdAt|human_datetime }}
@@ -13,10 +12,24 @@
   </td>
   <td>
     <div class="d-flex justify-content-end align-items-center">
-      <button class="btn btn-sm btn-ghost-info btn-icon shadow-none" title="Renommer" data-drive-action="rename-folder" data-item-id="{{ folder.id }}">
+      {# Ajout de data-item-name ici 👇 #}
+      <button 
+        class="btn btn-sm btn-ghost-info btn-icon shadow-none" 
+        title="Renommer" 
+        data-bs-toggle="modal"
+        data-bs-target="#modalFolderForm"
+        data-drive-action="rename-folder" 
+        data-item-id="{{ folder.id }}" 
+        data-item-name="{{ folder.name }}"
+      >
         <i class="ri-pencil-line"></i>
       </button>
-      <button class="btn btn-sm btn-ghost-danger btn-icon shadow-none" title="Supprimer" data-drive-action="trash-folder" data-item-id="{{ folder.id }}">
+      <button 
+        class="btn btn-sm btn-ghost-danger btn-icon shadow-none" 
+        title="Supprimer" 
+        data-drive-action="trash-folder" 
+        data-item-id="{{ folder.id }}"
+      >
         <i class="ri-delete-bin-line"></i>
       </button>
     </div>

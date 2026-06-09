@@ -1,12 +1,33 @@
 {# templates/app/drive/components/_file.html.twig #}
 
-{# On récupère le tableau {icon, color} via ton nouveau filtre #}
+{# On récupère le tableau {icon, color} via ton filtre #}
 {% set iconData = file.extension|file_icon %}
 
 <tr data-drive-item="file" data-item-id="{{ file.id }}">
   <th scope="row">
-    <i class="{{ iconData.icon }} text-{{ iconData.color }} align-bottom me-2 fs-5"></i>
-    <span class="item-name">{{ file.niceName ?: file.originalName }}</span>
+    <div class="d-flex align-items-center gap-2">
+      <i class="{{ iconData.icon }} text-{{ iconData.color }} align-bottom fs-5"></i>
+      <span class="item-name text-truncate">{{ file.niceName ?: file.originalName }}</span>
+      
+      {# --- PILULE DU TAG (Style Finder) --- #}
+      <span 
+        class="tag-pill-trigger d-inline-flex align-items-center justify-content-center flex-shrink-0" 
+        style="cursor: pointer; width: 14px; height: 14px;"
+        data-bs-toggle="modal" 
+        href="#modalTagForm"
+        data-drive-action="open-tag-modal"
+        data-tag-modal-form-id="{{ file.id }}"
+        data-tag-modal-form-value="{{ file.tag ? file.tag.id : '' }}"
+        title="{{ file.tag ? file.tag.name : 'Ajouter une étiquette' }}"
+        data-bs-toggle="tooltip"
+      >
+        {% if file.tag %}
+          <span class="rounded-circle shadow-sm bg-{{ file.tag.color.value }}" style="width: 12px; height: 12px;"></span>
+        {% else %}
+          <span class="rounded-circle border border-secondary border-dashed opacity-50 hover-opacity-100" style="width: 12px; height: 12px;"></span>
+        {% endif %}
+      </span>
+    </div>
   </th>
   <td>
     {{ file.size|file_formatted_size }}
@@ -29,12 +50,23 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="font-size: 14px;">
           <li>
-            <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-drive-action="rename-file" data-item-id="{{ file.id }}">
+            <a 
+              class="dropdown-item d-flex align-items-center gap-2" 
+              href="#" 
+              data-drive-action="rename-file" 
+              data-item-id="{{ file.id }}" 
+              data-item-name="{{ file.niceName ?: file.originalName }}"
+            >
               <i class="ri-pencil-line text-muted"></i> Renommer
             </a>
           </li>
           <li>
-            <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-drive-action="download-file" data-item-id="{{ file.id }}">
+            <a 
+              class="dropdown-item d-flex align-items-center gap-2" 
+              href="#" 
+              data-drive-action="download-file" 
+              data-item-id="{{ file.id }}"
+            >
               <i class="ri-download-2-line text-muted"></i> Télécharger
             </a>
           </li>

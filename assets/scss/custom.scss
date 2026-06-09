@@ -51,7 +51,8 @@
 }
 
 $custom-colors:
-  blue, indigo, purple, pink, red, orange, yellow, green, teal, cyan;
+  'blue', 'indigo', 'purple', 'pink', 'red', 'orange', 'yellow', 'green',
+  'teal', 'cyan';
 
 @each $color in $custom-colors {
   .bg-#{$color} {
@@ -124,4 +125,10 @@ $custom-colors:
       margin-bottom: 0;
     }
   }
+}
+
+/* Feedback visuel lors de la sélection d'un tag */
+.js-selector-option[aria-selected='true'] {
+  border-color: var(--bs-primary) !important;
+  background-color: rgba(var(--bs-primary-rgb), 0.08) !important;
 }

@@ -5,7 +5,7 @@
         <h5 class="modal-title" id="modalFolderFormLabel">Créer un dossier</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="{{ url('ajax_drive_folder_add') }}" method="post">
+      <form action="" method="post" id="folderModalForm" data-form-action="add | edit" data-folder-id="">
         <div class="modal-body">
           <div class="form-group">
             <label for="folderName" class="form-label">Nom du dossier</label>

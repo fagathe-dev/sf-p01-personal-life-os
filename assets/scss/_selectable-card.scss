@@ -11,6 +11,12 @@
     cursor: pointer;
     display: inline-flex;
 
+    // Si l'input caché a la classe is-invalid, on stylise le label enfant
+    &:has(.form-selectable-input.is-invalid) .form-selectable-label {
+      border-color: var(--bs-danger);
+      box-shadow: 0 0 0 3px rgba(var(--bs-danger-rgb), 0.25);
+    }
+
     // L'input est caché mais reste focusable pour l'accessibilité
     .form-selectable-input {
       position: absolute;
@@ -39,7 +45,9 @@
     &.active .form-selectable-label,
     .form-selectable-input:checked + .form-selectable-label {
       // Effet "Double Ring" avec la couleur de la bordure Velzon
-      box-shadow: 0 0 0 2px var(--vz-card-bg-custom, #fff), 0 0 0 4px var(--vz-primary);
+      box-shadow:
+        0 0 0 2px var(--vz-card-bg-custom, #fff),
+        0 0 0 4px var(--vz-primary);
       transform: scale(1.1);
       border-color: transparent;
     }

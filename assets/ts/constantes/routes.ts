@@ -14,14 +14,12 @@ const ROUTES = {
   DRIVE: {
     FILE: {
       ADD: '/ajax/drive/file/add',
-      DELETE: '/ajax/drive/file/{id}/delete',
-      RENAME: '/ajax/drive/file/{id}/rename',
-      MOVE: '/ajax/drive/file/{id}/move',
+      ACTION: '/ajax/drive/file/{id}/{action}',
     },
     FOLDER: {
       ADD: '/ajax/drive/folder/add',
+      ACTION: '/ajax/drive/folder/{id}/{action}',
       DELETE: '/ajax/drive/folder/{id}/delete',
-      RENAME: '/ajax/drive/folder/{id}/rename',
     },
   },
 } as const;
