@@ -9,7 +9,7 @@
     {# En-tête #}
     <div class="row mb-4 align-items-center">
       <div class="col">
-        <h1 class="h3 mb-0 text-gray-800">Mon Drive</h1>
+        <h1 class="h3 mb-0 text-gray-800">{{ driveFolder.name | default('Mon Drive') }}</h1>
       </div>
       <div class="col-auto">
         <div class="btn-group">
@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <div id="b-drive-root">
+    <div id="b-drive-root" data-current-folder-id="{{ driveFolder.id | default('') }}">
       
       {# --- SECTION DOSSIERS --- #}
       <section id="b-drive-folders-container" class="bg-white p-3 mb-4 rounded shadow-sm border border-light">
@@ -40,7 +40,7 @@
               <tr>
                 <th scope="col" style="width: 50%;">Nom</th>
                 <th scope="col">Taille</th>
-                {# <th scope="col">Date de modification</th> #}
+                <th scope="col">Date de modification</th>
                 <th scope="col" class="text-end">Actions</th>
               </tr>
             </thead>

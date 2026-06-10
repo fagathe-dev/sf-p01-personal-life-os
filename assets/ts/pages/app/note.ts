@@ -1,6 +1,6 @@
 import { $, convertMarkdownToHtml, fetchAPI, isEmpty, router, SelectableField } from 'core-ts'; // Importe ton composant
 import { CustomSelector } from '@/features';
-import { ROUTES } from '@/constantes/routes';
+import { ROUTES } from '@/constantes';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialisation du filtre de couleur visuel

@@ -7,6 +7,7 @@ use App\Entity\Folder;
 use App\Service\DriveService;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -18,10 +19,10 @@ final class DriveController extends AbstractController
     }
 
     #[Route(path: '', name: 'index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
         // Géré automatiquement par le service (Racine)
-        $context = $this->driveService->manageContent(null);
+        $context = $this->driveService->manageContent(null, $request);
 
         return $this->render('app/drive/index.html.twig', $context);
     }
@@ -35,6 +36,7 @@ final class DriveController extends AbstractController
 
         // Géré automatiquement par le service (Dans un dossier)
         $context = $this->driveService->manageContent($folder);
+        $context = [...$context, 'driveFolder' => $folder];
 
         return $this->render('app/drive/index.html.twig', $context);
     }

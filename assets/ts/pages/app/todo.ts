@@ -1,6 +1,6 @@
 import { $, insertElementToDOM, fetchAPI, router } from 'core-ts';
 import { CustomSelector } from '@/features';
-import { ROUTES } from '@/constantes/routes';
+import { ROUTES } from '@/constantes';
 
 console.log('Todo page script is being executed.');
 

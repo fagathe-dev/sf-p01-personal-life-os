@@ -9,37 +9,39 @@
         <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      {# L'action sera injectée dynamiquement par le JS #}
       <form id="driveFileTagForm" action="#" method="post">
         <div class="modal-body">
           
           <div class="form-group mb-0">
-            {# 
-              Zone ciblée par new CustomSelector() en TypeScript 
-              Le mode 'nullable' permet de décocher un tag actif
-            #}
-            <div data-input-id="drive_file_tag" data-cds-mode="nullable" data-cds-placeholder="Sélectionner une étiquette...">
-              {# On boucle sur les tags de l'utilisateur passés par le contrôleur #}
+            {# Conteneur piloté par SelectableField #}
+            <div class="form-selectable custom-form-selectable js-tag-selectable-container d-flex flex-wrap gap-3 justify-content-center py-3">
+              
               {% for tag in userTags|default([]) %}
-                <label class="d-flex align-items-center mb-2" style="cursor: pointer;">
-                  <input type="radio" name="tag_id" value="{{ tag.id }}" class="d-none">
-                  <span class="badge border border-light text-body bg-white shadow-sm py-2 px-3 w-100 text-start">
-                    {% if tag.color %}
-                      <span class="rounded-circle d-inline-block me-2 bg-{{ tag.color.value }}" style="width: 8px; height: 8px;"></span>
-                    {% endif %}
-                    {{ tag.name }}
-                  </span>
-                </label>
+                <div class="form-selectable-item">
+                  <input type="radio" 
+                    id="drive_tag_{{ tag.id }}" 
+                    name="tag_id" 
+                    value="{{ tag.id }}" 
+                    class="form-selectable-input d-none">
+                    
+                  {# Pastille de couleur avec infobulle #}
+                  <label class="form-selectable-label color-swatch bg-{{ tag.color.value }}" 
+                    for="drive_tag_{{ tag.id }}"
+                    title="{{ tag.name }}"
+                    data-bs-toggle="tooltip">
+                  </label>
+                </div>
               {% else %}
                 <p class="text-muted fs-13 mb-0 text-center">Aucune étiquette disponible.</p>
               {% endfor %}
+
             </div>
           </div>
 
         </div>
         
         <div class="modal-footer border-top-0 pt-0">
-          <button type="submit" class="btn btn-primary w-100 shadow-sm">Enregistrer</button>
+          <button type="submit" class="btn btn-primary w-100 shadow-sm d-none">Enregistrer</button>
         </div>
       </form>
 
