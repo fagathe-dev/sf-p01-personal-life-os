@@ -13,8 +13,8 @@ const ROUTES = {
   },
   DRIVE: {
     FILE: {
-      ADD: '/ajax/drive/file/add',
-      ACTION: '/ajax/drive/file/{id}/{action}',
+      UPLOAD: '/ajax/drive/file/upload',
+      ACTION: '/ajax/drive/file/edit/{id}/{action}',
     },
     FOLDER: {
       ADD: '/ajax/drive/folder/add',

@@ -4,7 +4,7 @@ namespace App\Enum;
 enum ContentStateEnum: string
 {
     case Open = 'open'; // Default value for new content (drive & note only)
-    case Archieved = 'archived';
+    case Archive = 'archive';
     case Trash = 'trash'; // 
 
     /**

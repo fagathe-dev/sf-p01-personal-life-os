@@ -26,7 +26,7 @@ class DriveDocumentRepository extends ServiceEntityRepository
      */
     public function save(DriveDocument $file, bool $flush = true, bool $isCreation = false): bool
     {
-        try {
+        // try {
             $now = $this->now();
             if ($isCreation) {
                 $file->setCreatedAt($now)
@@ -44,9 +44,9 @@ class DriveDocumentRepository extends ServiceEntityRepository
             }
 
             return true;
-        } catch (ORMException $ormException) {
-            return false;
-        }
+        // } catch (ORMException $ormException) {
+        //     return false;
+        // }
     }
 
     /**

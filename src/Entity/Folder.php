@@ -176,4 +176,28 @@ class Folder
 
         return $this;
     }
+    
+    /**
+     * Calcule la taille totale du dossier de manière récursive.
+     * (Somme des fichiers du dossier + somme des sous-dossiers)
+     *
+     * @return int La taille totale en octets
+     */
+    public function getSize(): int
+    {
+        $totalSize = 0;
+
+        // 1. Somme des fichiers directement présents dans ce dossier
+        foreach ($this->documents as $document) {
+            // Puisque DriveDocument hérite d'AbstractFile, il possède getSize()
+            $totalSize += $document->getSize() ?? 0;
+        }
+
+        // 2. Descente récursive dans chaque sous-dossier enfant
+        foreach ($this->children as $child) {
+            $totalSize += $child->getSize();
+        }
+
+        return $totalSize;
+    }
 }

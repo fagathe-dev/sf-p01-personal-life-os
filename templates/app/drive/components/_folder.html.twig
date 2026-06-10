@@ -2,9 +2,16 @@
 
 <tr data-drive-item="folder" data-item-id="{{ folder.id }}">
   <th scope="row">
-    <i class="ri-folder-2-fill align-bottom text-warning me-2 fs-5"></i> 
-    <span class="item-name fw-medium">{{ folder.name }}</span>
+    <a class="text-body" href="{{ url('app_drive_folder', { id: folder.id }) }}" title="Accéder au dossier {{ folder.name }}">
+      <i class="ri-folder-2-fill align-bottom text-warning me-2 fs-5"></i> 
+      <span class="item-name fw-medium">{{ folder.name }}</span>
+    </a>
   </th>
+  <td>
+    <span class="text-muted">
+      {{ folder.size|file_formatted_size }}
+    </span>
+  </td>
   <td>
     <span class="text-muted">
       {{ folder.updatedAt ? folder.updatedAt|human_datetime : folder.createdAt|human_datetime }}

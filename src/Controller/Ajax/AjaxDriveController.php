@@ -20,16 +20,39 @@ final class AjaxDriveController extends AbstractController
     ) {
     }
 
-    #[Route(path: '/file/add', name: 'file_add', methods: ['POST'])]
-    public function addFile(): JsonResponse
+    #[Route(path: '/file/upload', name: 'file_upload', methods: ['POST'])]
+    public function uploadFile(Request $request): JsonResponse
     {
-        return new JsonResponse(['success' => true, 'message' => 'Hello from Drive AJAX!']);
+        // 1. Appel du service d'upload
+        $result = $this->driveService->uploadFile($request);
+
+        // 2. Si le service a échoué et retourné un objet d'erreur standard (ResponseTrait)
+        if (!($result instanceof DriveDocument)) {
+            return $this->json($result->data, $result->status, $result->headers);
+        }
+
+        // 3. Succès : On génère le HTML du composant _file avec le nouveau fichier
+        $html = $this->renderView('app/drive/components/_file.html.twig', [
+            'file' => $result
+        ]);
+
+        return $this->json([
+            'success' => true,
+            'html' => $html, // Le HTML compilé prêt à rejoindre le DOM
+            'message' => 'Fichier importé avec succès.'
+        ], 201);
     }
 
-    #[Route(path: '/file/edit/{id}/{action}', name: 'file_edit', methods: ['POST'], requirements: ['id' => '\d+', 'action' => 'rename|move|trash|archive|pin'])]
-    public function editFileActions(#[MapEntity(mapping: ['id' => 'id'])] DriveDocument $file, string $action): JsonResponse
+    /**
+     * Dispatcher unifié pour toutes les actions rapides associées aux fichiers.
+     * 👈 Le chemin correspond exactement à ROUTES.DRIVE.FILE.ACTION : /file/edit/{id}/{action}
+     */
+    #[Route(path: '/file/edit/{id}/{action}', name: 'file_action', methods: ['POST'], requirements: ['id' => '\d+', 'action' => 'rename|move|trash|archive|pin|tag|download'])]
+    public function editFileActions(Request $request, #[MapEntity(mapping: ['id' => 'id'])] DriveDocument $file, string $action): JsonResponse
     {
-        return new JsonResponse(['success' => true, 'message' => "Editing file with ID {$file->getId()} and action $action"]);
+        $result = $this->driveService->fileQuickActions($file, $action, $request);
+
+        return $this->json($result->data, $result->status, $result->headers);
     }
 
     #[Route(path: '/folder/add', name: 'folder_add', methods: ['POST'], requirements: ['action' => 'add|edit|trash'])]

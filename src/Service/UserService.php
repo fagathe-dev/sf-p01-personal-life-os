@@ -26,6 +26,7 @@ use Fagathe\CorePhp\Trait\LoggerTrait;
 use Fagathe\CorePhp\Trait\PaginationTrait;
 use Fagathe\CorePhp\Trait\SessionFlashTrait;
 use Knp\Component\Pager\Pagination\PaginationInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -74,9 +75,11 @@ final class UserService
         private readonly UploaderService $uploaderService,
         private readonly UploaderValidationService $uploaderValidationService,
         private readonly ProfileChangeEmailEmail $profileChangeEmailEmail, // 👈 Ajout
+        PaginatorInterface $paginator,
         private readonly string $projectDir,
     ) {
         $this->filesystem = new Filesystem;
+        $this->paginator = $paginator;
     }
 
     /**
