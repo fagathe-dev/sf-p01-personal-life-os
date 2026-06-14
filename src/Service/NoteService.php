@@ -239,7 +239,7 @@ final class NoteService
 
                 case 'archive':
                     // ⚠️ Attention à l'écriture "Archieved" présente dans l'Enum
-                    $note->setState(ContentStateEnum::Archieved);
+                    $note->setState(ContentStateEnum::Archive);
                     break;
 
                 case 'trash':

@@ -85,7 +85,7 @@
 - **id** : int — Identifiant unique
 - **name** : string — Nom du tag
 - **description** : string|null — Description
-- **color** : TagColorEnum|string|null — Couleur
+- **color** : ColorEnum|string|null — Couleur
 - **created_at** : DateTimeImmutable — Date de création
 - **updated_at** : DateTimeImmutable|null — Date de modification
 

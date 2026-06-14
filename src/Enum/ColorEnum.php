@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Enum;
-enum TagColorEnum: string
+enum ColorEnum: string
 {
     case Blue = 'blue';
     case Indigo = 'indigo';

@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Enum\TagColorEnum;
+use App\Enum\ColorEnum;
 use App\Repository\TagRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -23,8 +23,8 @@ class Tag
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(length: 20, nullable: true, enumType: TagColorEnum::class)]
-    private TagColorEnum|string|null $color = null;
+    #[ORM\Column(length: 20, nullable: true, enumType: ColorEnum::class)]
+    private ColorEnum|string|null $color = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
@@ -89,15 +89,15 @@ class Tag
         return $this;
     }
 
-    public function getColor(): ?TagColorEnum
+    public function getColor(): ?ColorEnum
     {
         return $this->color;
     }
 
-    public function setColor(TagColorEnum|string|null $color): static
+    public function setColor(ColorEnum|string|null $color): static
     {
         if (is_string($color)) {
-            $color = TagColorEnum::tryFrom($color);
+            $color = ColorEnum::tryFrom($color);
         }
 
         $this->color = $color;

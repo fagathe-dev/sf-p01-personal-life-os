@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\ColorEnum;
 use App\Repository\CapsuleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -17,12 +18,9 @@ class Capsule
 
     #[ORM\Column(length: 255)]
     private ?string $title = null;
-
+    
     #[ORM\Column]
-    private ?\DateTimeImmutable $unlockAt = null;
-
-    #[ORM\Column(options: ['default' => false])]
-    private bool $isOpened = false;
+    private ?\DateTimeImmutable $lockedAt = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $secret = null;
@@ -36,6 +34,18 @@ class Capsule
      */
     #[ORM\OneToMany(targetEntity: CapsuleMedia::class, mappedBy: 'capsule', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $medias;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $created_at = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updated_at = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $icon = null;
+
+    #[ORM\Column(length: 30, nullable: true, enumType: ColorEnum::class)]
+    private ?ColorEnum $color = null;
 
     public function __construct()
     {
@@ -59,26 +69,14 @@ class Capsule
         return $this;
     }
 
-    public function getUnlockAt(): ?\DateTimeImmutable
+    public function getLockedAt(): ?\DateTimeImmutable
     {
-        return $this->unlockAt;
+        return $this->lockedAt;
     }
 
-    public function setUnlockAt(\DateTimeImmutable $unlockAt): static
+    public function setLockedAt(\DateTimeImmutable $lockedAt): static
     {
-        $this->unlockAt = $unlockAt;
-
-        return $this;
-    }
-
-    public function isOpened(): bool
-    {
-        return $this->isOpened;
-    }
-
-    public function setIsOpened(bool $isOpened): static
-    {
-        $this->isOpened = $isOpened;
+        $this->lockedAt = $lockedAt;
 
         return $this;
     }
@@ -132,6 +130,54 @@ class Capsule
                 $media->setCapsule(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updated_at): static
+    {
+        $this->updated_at = $updated_at;
+
+        return $this;
+    }
+
+    public function getIcon(): ?string
+    {
+        return $this->icon;
+    }
+
+    public function setIcon(?string $icon): static
+    {
+        $this->icon = $icon;
+
+        return $this;
+    }
+
+    public function getColor(): ?ColorEnum
+    {
+        return $this->color;
+    }
+
+    public function setColor(?ColorEnum $color): static
+    {
+        $this->color = $color;
 
         return $this;
     }
