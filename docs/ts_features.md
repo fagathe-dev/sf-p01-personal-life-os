@@ -83,7 +83,7 @@ Le composant s'attend à recevoir un champ étendu pour que Symfony génère phy
 
 ```php
 $builder->add('color', EnumType::class, [
-    'class' => TagColorEnum::class,
+    'class' => ColorEnum::class,
     'expanded' => true,  // ⚠️ Requis : génère des boutons radios / checkboxes
     'multiple' => false, // false = mode radio, true = mode checkbox
 ]);

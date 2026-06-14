@@ -3,7 +3,7 @@
 namespace App\Form\Auth\Profile;
 
 use App\Entity\Tag;
-use App\Enum\TagColorEnum;
+use App\Enum\ColorEnum;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
@@ -28,8 +28,8 @@ class TagType extends AbstractType
             ])
             ->add('color', EnumType::class, [
                 // Appel direct de ta méthode
-                // 'choices' => TagColorEnum::choices(),
-                'class' => TagColorEnum::class, 
+                // 'choices' => ColorEnum::choices(),
+                'class' => ColorEnum::class,
                 'expanded' => true,
                 'multiple' => false,
                 'label' => 'Couleur de l\'étiquette',
