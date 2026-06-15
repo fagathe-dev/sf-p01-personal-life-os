@@ -86,7 +86,7 @@ final class DriveService
         // 2. Récupération des fichiers actifs (uniquement à l'état Open)
         $files = $this->documentRepository->findBy(
             ['owner' => $user, 'folder' => $folder, 'state' => ContentStateEnum::Open],
-            ['updated_at' => 'DESC', 'created_at' => 'DESC']
+            ['updated_at' => 'DESC', 'created_at' => 'DESC', 'deleted_at' => null],
         );
 
         if ($this->environment === 'dev' && !is_null($request) && $mock === true) {
@@ -597,6 +597,10 @@ final class DriveService
     private function changeFileState(DriveDocument $file, ContentStateEnum $state): object
     {
         $file->setState($state);
+        if ($state === ContentStateEnum::Trash) {
+            $file->setDeletedAt($this->now());
+        }
+
         if ($this->saveFile($file)) {
             return $this->sendJson(['success' => true]);
         }

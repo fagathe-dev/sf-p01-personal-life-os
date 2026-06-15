@@ -51,12 +51,14 @@ final class ArchivesTrashService
     {
         $file->setState(ContentStateEnum::Open); //
         $file->setFolder(null); // Conforme à tes specs : mise à plat à la racine
+        $file->setDeletedAt(null); // Réinitialisation de la date de suppression
         $this->documentRepository->save($file, true);
     }
 
     public function restoreNote(Note $note): void
     {
         $note->setState(ContentStateEnum::Open);
+        $note->setDeletedAt(null); // Réinitialisation de la date de suppression
         $this->entityManager->flush();
     }
 

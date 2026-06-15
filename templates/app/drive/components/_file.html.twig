@@ -13,13 +13,15 @@
       <span 
         class="tag-pill-trigger d-inline-flex align-items-center justify-content-center flex-shrink-0" 
         style="cursor: pointer; width: 14px; height: 14px;"
-        data-bs-toggle="modal" 
-        href="#modalTagForm"
-        data-drive-action="open-tag-modal"
-        data-tag-modal-form-id="{{ file.id }}"
-        data-tag-modal-form-value="{{ file.tag ? file.tag.id : '' }}"
-        title="{{ file.tag ? file.tag.name : 'Ajouter une étiquette' }}"
-        data-bs-toggle="tooltip"
+        {% if file.state.value == 'open' %}
+          data-bs-toggle="modal" 
+          href="#modalTagForm"
+          data-drive-action="open-tag-modal"
+          data-tag-modal-form-id="{{ file.id }}"
+          data-tag-modal-form-value="{{ file.tag ? file.tag.id : '' }}"
+          data-bs-toggle="tooltip"
+          title="{{ file.tag ? file.tag.name : 'Ajouter une étiquette' }}"
+        {% endif %}
       >
         {% if file.tag %}
           <span class="rounded-circle shadow-sm bg-{{ file.tag.color.value }}" style="width: 12px; height: 12px;"></span>
@@ -88,17 +90,25 @@
           </li>
           
           <li><hr class="dropdown-divider"></li>
-          
-          <li>
-            <a class="dropdown-item d-flex align-items-center gap-2 link-warning" href="#" data-drive-action="archive-file" data-item-id="{{ file.id }}">
-              <i class="ri-archive-line"></i> Archiver
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item d-flex align-items-center gap-2 link-danger" href="#" data-drive-action="trash-file" data-item-id="{{ file.id }}">
-              <i class="ri-delete-bin-line"></i> Corbeille
-            </a>
-          </li>
+
+          {% if file.state.value == 'archive' or file.state.value == 'trash' %}
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-drive-action="restore-file" data-item-id="{{ file.id }}">
+                <i class="ri-arrow-go-back-line"></i> Restaurer
+              </a>
+            </li>
+          {% else %}
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2 link-warning" href="#" data-drive-action="archive-file" data-item-id="{{ file.id }}">
+                <i class="ri-archive-line"></i> Archiver
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2 link-danger" href="#" data-drive-action="trash-file" data-item-id="{{ file.id }}">
+                <i class="ri-delete-bin-line"></i> Corbeille
+              </a>
+            </li>
+          {% endif %}
         </ul>
       </div>
     </div>

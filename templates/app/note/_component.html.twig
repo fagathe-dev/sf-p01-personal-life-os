@@ -43,18 +43,21 @@
         <i class="ri-more-2-fill fs-5"></i>
       </button>
       <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="font-size: 14px;">
-        {% if note.state.value != 'open' %}
-          {# archive ou corbeille --- IGNORE --- #}
+        {% if note.state.value == 'archive' or note.state.value == 'trash' %}
+          <li>
+            {# 👈 Changement de data-action="archive" par "restore-note" #}
+            <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-action="restore-note" data-id="{{ note.id }}">
+              <i class="ri-arrow-go-back-line"></i> Restaurer
+            </a>
+          </li>
         {% else %}  
           <li>
-            {# 💡 Ajout des attributs data-action et data-id #}
             <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-action="archive" data-id="{{ note.id }}">
               <i class="ri-archive-line text-muted"></i> Archiver
             </a>
           </li>
           <li><hr class="dropdown-divider"></li>
           <li>
-            {# 💡 Ajout des attributs data-action et data-id #}
             <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" data-action="trash" data-id="{{ note.id }}">
               <i class="ri-delete-bin-line"></i> Corbeille
             </a>

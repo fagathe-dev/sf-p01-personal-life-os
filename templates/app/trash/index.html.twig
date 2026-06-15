@@ -4,7 +4,7 @@
 {% block title %}Corbeille - B.A.S.E{% endblock %}
 
 {% block content %}
-  <div class="container-fluid py-4" style="max-width: 1000px;">
+  <div class="container-fluid py-4" style="max-width: 1000px;" id="b-trash-root">
     
     {# En-tête #}
     <div class="row mb-4 align-items-center">
@@ -23,9 +23,6 @@
             <i class="ri-delete-bin-2-line align-middle me-1"></i> Vider la corbeille
           </button>
         {% endif %}
-        <a class="btn btn-light btn-sm shadow-sm" href="{{ url('app_drive_index') }}">
-          <i class="ri-arrow-left-line align-middle me-1"></i> Retour au Drive
-        </a>
       </div>
     </div>
 
@@ -76,7 +73,7 @@
       {# Onglet Notes #}
       <div class="tab-pane fade" id="panel-notes" role="tabpanel" aria-labelledby="notes-tab">
         <section id="b-trash-notes-container">
-          <div class="row g-3" id="b-trash-notes-list">
+          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="b-trash-notes-list">
             {% for note in notes|default([]) %}
               {% include 'app/note/_component.html.twig' with {'note': note} %}
             {% else %}

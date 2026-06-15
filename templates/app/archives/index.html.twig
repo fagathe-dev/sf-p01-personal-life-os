@@ -4,7 +4,7 @@
 {% block title %}Archives - B.A.S.E{% endblock %}
 
 {% block content %}
-  <div class="container-fluid py-4" style="max-width: 1000px;">
+  <div class="container-fluid py-4" style="max-width: 1000px;" id="b-archives-root">
     
     {# En-tête #}
     <div class="row mb-4 align-items-center">
@@ -19,9 +19,6 @@
             <i class="ri-arrow-go-back-line align-middle me-1"></i> Tout restaurer
           </button>
         {% endif %}
-        <a class="btn btn-light btn-sm shadow-sm" href="{{ url('app_drive_index') }}">
-          <i class="ri-arrow-left-line align-middle me-1"></i> Retour au Drive
-        </a>
       </div>
     </div>
 
@@ -72,7 +69,7 @@
       {# Onglet Notes #}
       <div class="tab-pane fade" id="panel-notes" role="tabpanel" aria-labelledby="notes-tab">
         <section id="b-archive-notes-container">
-          <div class="row g-3" id="b-archive-notes-list">
+          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="b-archive-notes-list">
             {% for note in notes|default([]) %}
               {% include 'app/note/_component.html.twig' with {'note': note} %}
             {% else %}
@@ -90,5 +87,5 @@
 {% endblock %}
 
 {% block js %}
-  <script src="{{ asset('js/pages/app/archive.js') }}"></script>
+  <script src="{{ asset('js/pages/app/archives.js') }}"></script>
 {% endblock %}

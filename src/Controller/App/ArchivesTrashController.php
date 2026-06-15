@@ -20,12 +20,12 @@ final class ArchivesTrashController extends AbstractController
     /**
      * Affiche la liste plate et cloisonnée des fichiers et notes archivés.
      */
-    #[Route(path: '/archives', name: 'app_archive_index', methods: ['GET'])]
+    #[Route(path: '/archives', name: 'app_archives_index', methods: ['GET'])]
     public function archiveIndex(): Response
     {
         $content = $this->archiveTrashService->getArchiveContent();
 
-        return $this->render('app/archive/index.html.twig', [
+        return $this->render('app/archives/index.html.twig', [
             'files' => $content['files'],
             'notes' => $content['notes'],
         ]);

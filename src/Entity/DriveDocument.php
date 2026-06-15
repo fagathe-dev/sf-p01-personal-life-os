@@ -22,6 +22,9 @@ class DriveDocument extends AbstractFile
     #[ORM\ManyToOne(inversedBy: 'driveDocuments')]
     private ?Tag $tag = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $deleted_at = null;
+
     public function getState(): ?ContentStateEnum
     {
         return $this->state;
@@ -70,6 +73,18 @@ class DriveDocument extends AbstractFile
     public function setTag(?Tag $tag): static
     {
         $this->tag = $tag;
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deleted_at;
+    }
+
+    public function setDeletedAt(?\DateTimeImmutable $deleted_at): static
+    {
+        $this->deleted_at = $deleted_at;
 
         return $this;
     }
