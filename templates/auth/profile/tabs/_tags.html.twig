@@ -21,9 +21,9 @@
       {% for tag in tags %}
         <tr>
           <td style="padding-left: 1.5rem;">
-            <span class="badge rounded-pill bg-{{ tag.color.value }} px-3 py-2 fs-14">
+            <a href="{{ path('auth_profile_tag_edit', {'id': tag.id}) }}" class="badge rounded-pill bg-{{ tag.color.value }} px-3 py-2 fs-14">
               {{ tag.name }}
-            </span>
+            </a>
           </td>
           <td class="text-muted">
             <code>{{ tag.color.value }}</code>

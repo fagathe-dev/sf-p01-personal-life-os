@@ -23,7 +23,7 @@
       <div class="card-body p-3">
         <div class="row g-3">
           <div class="col-md-8">
-            {{ form_start(quickAddForm, {'action': path('app_todo_manage'), 'attr': {'id': 'quick-add-form'}}) }}
+            {{ form_start(quickAddForm, {'attr': {'id': 'quick-add-form'}}) }}
             <div class="search-box">
               {{ form_widget(quickAddForm.title, {
                 'attr': {
