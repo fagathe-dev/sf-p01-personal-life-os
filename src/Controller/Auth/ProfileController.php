@@ -42,7 +42,6 @@ final class ProfileController extends AbstractController
         $infoForm = $this->createForm(ProfileInfoType::class, $user);
         $infoForm->handleRequest($request);
 
-
         $themePreferences = ThemePreferenceEnum::choices();
 
         if ($infoForm->isSubmitted() && $infoForm->isValid()) {

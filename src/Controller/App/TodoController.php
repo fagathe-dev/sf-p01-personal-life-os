@@ -54,7 +54,7 @@ final class TodoController extends AbstractController
         $quickAddForm->handleRequest($request);
 
         if ($quickAddForm->isSubmitted() && $quickAddForm->isValid()) {
-            $task->addTag($tag); // On pré-associe le tag actif à la nouvelle tâche
+            $task->setTag($tag); // On pré-associe le tag actif à la nouvelle tâche
 
             if ($this->todoService->saveTask($task, true)) {
                 $this->addFlash('success', 'Tâche ajoutée avec l\'étiquette !');
