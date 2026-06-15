@@ -86,9 +86,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Folder::class, mappedBy: 'owner')]
     private Collection $folders;
 
-    #[ORM\OneToOne(mappedBy: 'owner', cascade: ['persist', 'remove'])]
-    private ?Journal $journal = null;
-
     #[ORM\Column(length: 80, nullable: true)]
     #[Assert\Length(max: 80, maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.')]
     #[Assert\NotBlank(allowNull: true, message: 'Veuillez saisir un prénom')]
@@ -371,26 +368,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $note->setOwner(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getJournal(): ?Journal
-    {
-        return $this->journal;
-    }
-
-    public function setJournal(?Journal $journal): static
-    {
-        if ($journal === null && $this->journal !== null) {
-            $this->journal->setOwner(null);
-        }
-
-        if ($journal !== null && $journal->getOwner() !== $this) {
-            $journal->setOwner($this);
-        }
-
-        $this->journal = $journal;
 
         return $this;
     }
