@@ -1,0 +1,98 @@
+{# templates/app/trash/index.html.twig #}
+{% extends 'layouts/dashboard.html.twig' %}
+
+{% block title %}Corbeille - B.A.S.E{% endblock %}
+
+{% block content %}
+  <div class="container-fluid py-4" style="max-width: 1000px;">
+    
+    {# En-tête #}
+    <div class="row mb-4 align-items-center">
+      <div class="col">
+        <h1 class="h3 mb-1 text-gray-800"><i class="ri-delete-bin-line text-danger me-2 align-middle"></i>Corbeille</h1>
+        <p class="text-muted small mb-0">Éléments supprimés à plat. Une fois purgés d'ici, la suppression est définitive et libère l'espace disque.</p>
+      </div>
+      <div class="col-auto d-flex gap-2">
+        {% if files|length > 0 or notes|length > 0 %}
+          {# 👈 Bouton Tout restaurer demandé #}
+          <button class="btn btn-sm btn-ghost-dark shadow-none" data-trash-action="restore-all">
+            <i class="ri-arrow-go-back-line align-middle me-1"></i> Tout restaurer
+          </button>
+          {# 👈 Modification de la classe en .btn-ghost-danger #}
+          <button class="btn btn-sm btn-ghost-danger shadow-none" id="emptyTrashBtn" data-trash-action="empty-all">
+            <i class="ri-delete-bin-2-line align-middle me-1"></i> Vider la corbeille
+          </button>
+        {% endif %}
+        <a class="btn btn-light btn-sm shadow-sm" href="{{ url('app_drive_index') }}">
+          <i class="ri-arrow-left-line align-middle me-1"></i> Retour au Drive
+        </a>
+      </div>
+    </div>
+
+    {# Système d'onglets Bootstrap #}
+    <ul class="nav nav-tabs mb-4" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active d-flex align-items-center gap-2" id="files-tab" data-bs-toggle="tab" data-bs-target="#panel-files" type="button" role="tab" aria-controls="panel-files" aria-selected="true">
+          <i class="ri-file-line"></i> Fichiers <span class="badge bg-light text-muted ms-1" id="badge-files-count">{{ files|length }}</span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link d-flex align-items-center gap-2" id="notes-tab" data-bs-toggle="tab" data-bs-target="#panel-notes" type="button" role="tab" aria-controls="panel-notes" aria-selected="false">
+          <i class="ri-sticky-note-line"></i> Notes <span class="badge bg-light text-muted ms-1" id="badge-notes-count">{{ notes|length }}</span>
+        </button>
+      </li>
+    </ul>
+
+    {# Contenu des onglets #}
+    <div class="tab-content">
+      
+      {# Onglet Fichiers #}
+      <div class="tab-pane fade show active" id="panel-files" role="tabpanel" aria-labelledby="files-tab">
+        <section id="b-trash-files-container" class="bg-white p-3 rounded shadow-sm border border-light">
+          <div class="table-responsive" style="overflow-x: unset;">
+            <table class="table table-nowrap table-borderless align-middle mb-0">
+              <thead class="text-muted fs-13">
+                <tr>
+                  <th scope="col" style="width: 50%;">Nom</th>
+                  <th scope="col">Taille</th>
+                  <th scope="col">Date de modification</th>
+                  <th scope="col" class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="b-trash-files-list">
+                {% for file in files|default([]) %}
+                  {% include 'app/drive/components/_file.html.twig' with {'file': file} %}
+                {% else %}
+                  <tr id="empty-file-row">
+                    <td colspan="4" class="text-center text-muted py-4">La corbeille ne contient aucun fichier</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      {# Onglet Notes #}
+      <div class="tab-pane fade" id="panel-notes" role="tabpanel" aria-labelledby="notes-tab">
+        <section id="b-trash-notes-container">
+          <div class="row g-3" id="b-trash-notes-list">
+            {% for note in notes|default([]) %}
+              {% include 'app/note/_component.html.twig' with {'note': note} %}
+            {% else %}
+              <div class="col-12 text-center text-muted py-5 bg-white rounded shadow-sm border border-light" id="empty-note-row">
+                <i class="ri-delete-bin-6-line fs-1 text-light d-block mb-2"></i>
+                La corbeille ne contient aucune note
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script src="{{ asset('js/pages/app/trash.js') }}"></script>
+{% endblock %}
