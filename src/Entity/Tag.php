@@ -38,28 +38,14 @@ class Tag
     private ?User $owner = null;
 
     /**
-     * @var Collection<int, Note>
-     */
-    #[ORM\OneToMany(targetEntity: Note::class, mappedBy: 'tag')]
-    private Collection $notes;
-
-    /**
      * @var Collection<int, Task>
      */
     #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'tag')]
     private Collection $tasks;
 
-    /**
-     * @var Collection<int, DriveDocument>
-     */
-    #[ORM\OneToMany(targetEntity: DriveDocument::class, mappedBy: 'tag')]
-    private Collection $driveDocuments;
-
     public function __construct()
     {
-        $this->notes = new ArrayCollection();
         $this->tasks = new ArrayCollection();
-        $this->driveDocuments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -144,48 +130,10 @@ class Tag
     }
 
     /**
-     * @return Collection<int, Note>
-     */
-    public function getNotes(): Collection
-    {
-        return $this->notes;
-    }
-
-    /**
      * @return Collection<int, Task>
      */
     public function getTasks(): Collection
     {
         return $this->tasks;
-    }
-
-    /**
-     * @return Collection<int, DriveDocument>
-     */
-    public function getDriveDocuments(): Collection
-    {
-        return $this->driveDocuments;
-    }
-
-    public function addDriveDocument(DriveDocument $driveDocument): static
-    {
-        if (!$this->driveDocuments->contains($driveDocument)) {
-            $this->driveDocuments->add($driveDocument);
-            $driveDocument->setTag($this);
-        }
-
-        return $this;
-    }
-
-    public function removeDriveDocument(DriveDocument $driveDocument): static
-    {
-        if ($this->driveDocuments->removeElement($driveDocument)) {
-            // set the owning side to null (unless already changed)
-            if ($driveDocument->getTag() === $this) {
-                $driveDocument->setTag(null);
-            }
-        }
-
-        return $this;
     }
 }

@@ -74,18 +74,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Tag::class, mappedBy: 'owner', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $tags;
 
-    /**
-     * @var Collection<int, Note>
-     */
-    #[ORM\OneToMany(targetEntity: Note::class, mappedBy: 'owner', cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Collection $notes;
-
-    /**
-     * @var Collection<int, Folder>
-     */
-    #[ORM\OneToMany(targetEntity: Folder::class, mappedBy: 'owner')]
-    private Collection $folders;
-
     #[ORM\Column(length: 80, nullable: true)]
     #[Assert\Length(max: 80, maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.')]
     #[Assert\NotBlank(allowNull: true, message: 'Veuillez saisir un prénom')]
@@ -100,8 +88,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->userRequests = new ArrayCollection();
         $this->tags = new ArrayCollection();
-        $this->notes = new ArrayCollection();
-        $this->folders = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -337,65 +323,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($tag->getOwner() === $this) {
                 $tag->setOwner(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Note>
-     */
-    public function getNotes(): Collection
-    {
-        return $this->notes;
-    }
-
-    public function addNote(Note $note): static
-    {
-        if (!$this->notes->contains($note)) {
-            $this->notes->add($note);
-            $note->setOwner($this);
-        }
-
-        return $this;
-    }
-
-    public function removeNote(Note $note): static
-    {
-        if ($this->notes->removeElement($note)) {
-            if ($note->getOwner() === $this) {
-                $note->setOwner(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Folder>
-     */
-    public function getFolders(): Collection
-    {
-        return $this->folders;
-    }
-
-    public function addFolder(Folder $folder): static
-    {
-        if (!$this->folders->contains($folder)) {
-            $this->folders->add($folder);
-            $folder->setOwner($this);
-        }
-
-        return $this;
-    }
-
-    public function removeFolder(Folder $folder): static
-    {
-        if ($this->folders->removeElement($folder)) {
-            // set the owning side to null (unless already changed)
-            if ($folder->getOwner() === $this) {
-                $folder->setOwner(null);
             }
         }
 

@@ -2,7 +2,6 @@
 
 namespace App\Repository;
 
-use App\Entity\Capsule;
 use App\Entity\User;
 use App\Security\Enum\RoleEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
