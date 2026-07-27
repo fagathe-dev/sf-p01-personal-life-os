@@ -22,30 +22,6 @@
                   <span>Todo</span>
                 </a>
               </li>
-              <li class="nav-item">
-                <a class="nav-link menu-link" href="{{ url('app_note_manage') }}">
-                  <i class="ri-sticky-note-line"></i>
-                  <span>Notes</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link menu-link" href="{{ url('app_drive_index') }}">
-                  <i class="ri-cloud-line"></i>
-                  <span>Drive</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link menu-link" href="{{ url('app_trash_index') }}">
-                  <i class="ri-delete-bin-line"></i>
-                  <span>Corbeille</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link menu-link" href="{{ url('app_archives_index') }}">
-                  <i class="ri-archive-line"></i>
-                  <span>Archives</span>
-                </a>
-              </li>
 
               {% if is_granted('ROLE_ADMIN') %}
                 {# Partie réservée aux administrateurs #}

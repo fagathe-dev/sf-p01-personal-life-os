@@ -1,0 +1,44 @@
+# ----------------------------------------------------------------------
+# Configuration Apache pour Symfony
+# ----------------------------------------------------------------------
+
+# Désactiver l'indexation des répertoires pour la sécurité
+Options -Indexes
+
+# Utiliser index.php comme contrôleur frontal
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Redirection forcée vers HTTPS
+    # Vérifie si HTTPS est inactif ou si le protocole n'est pas https via proxy
+    RewriteCond %{HTTPS} off [OR]
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # 2. Règles Symfony (Front Controller)
+    
+    # Si le fichier ou le dossier demandé existe physiquement, on l'affiche directement
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Sinon, on redirige toutes les autres requêtes vers index.php
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    # Fallback au cas où mod_rewrite ne serait pas chargé
+    <IfModule mod_alias.c>
+        RedirectMatch 302 ^/$ /index.php/
+    </IfModule>
+</IfModule>
+
+# ----------------------------------------------------------------------
+# Optionnel : Sécurité HSTS (optionnel, à activer avec prudence)
+# Force les navigateurs à n'utiliser que le HTTPS pour ce domaine
+# ----------------------------------------------------------------------
+<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+</IfModule>
