@@ -2,10 +2,10 @@ import { $, insertElementToDOM, fetchAPI, router } from 'core-ts';
 import { CustomSelector } from '@/features';
 import { ROUTES } from '@/constantes';
 
-console.log('Todo page script is being executed.');
+console.log('Task page script is being executed.');
 
 document.addEventListener('DOMContentLoaded', (): void => {
-  console.log('Todo page script loaded.');
+  console.log('Task page script loaded.');
   const tagsContainer = $<HTMLElement>(
     '[data-input-id="todo_tag"]',
   ) as HTMLElement | null;
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
               }
 
               // -- ÉTAPE C : Recalcul de l'interface --
-              updateTodoUIState();
+              updateTaskUIState();
             } else {
               // Rollback visuel de la coche en cas d'erreur métier
               target.checked = !target.checked;
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
 /**
  * Fonction utilitaire pour recalculer les compteurs et l'affichage des conteneurs
  */
-function updateTodoUIState() {
+function updateTaskUIState() {
   const activeList = $<HTMLElement>('#active-tasks-list');
   const completedList = $<HTMLElement>('#completed-tasks-list');
   const emptyActiveState = $<HTMLElement>('#empty-active-state');

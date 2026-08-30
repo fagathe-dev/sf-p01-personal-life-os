@@ -152,7 +152,7 @@ Les formulaires utilisent le rendu Symfony. Le formulaire de sélection enrichi
 permet une sélection unique ou multiple selon le contexte, avec recherche et
 synchronisation du `<select>` natif.
 
-## 6. Tâches / Todos
+## 6. Tâches / Tasks
 
 ### Liste et navigation
 

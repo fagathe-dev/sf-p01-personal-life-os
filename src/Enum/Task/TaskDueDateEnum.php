@@ -4,7 +4,7 @@ namespace App\Enum\Task;
 
 use DateTimeImmutable;
 
-enum TodoDueDateEnum: string
+enum TaskDueDateEnum: string
 {
     case Today = 'today';
     case Tomorrow = 'tomorrow';
