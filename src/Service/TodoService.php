@@ -3,7 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Tag;
-use App\Entity\Task;
+use App\Entity\Todo;
 use App\Entity\User;
 use App\Repository\TagRepository;
 use App\Repository\TaskRepository;
@@ -18,8 +18,6 @@ use Throwable;
 
 final class TodoService
 {
-    # Service de gestion des tâches (CRUD, validation, etc.)
-
     use LoggerTrait, DatetimeTrait;
 
     public function __construct(
@@ -30,250 +28,172 @@ final class TodoService
     ) {
     }
 
-    /**
-     * Récupère tous les tags de l'utilisateur connecté
-     * * @return Tag[]
-     */
     public function getCurrentUserTags(): array
     {
         $user = $this->getCurrentUser();
-        if (!$user) {
+        if (!$user)
             return [];
-        }
-
-        // On suppose que ton entité Tag a une relation 'owner' comme Task
         return $this->tagRepository->findBy(['owner' => $user], ['name' => 'ASC']);
     }
 
-    /**
-     * @param Tag $tag
-     * 
-     * @return array
-     */
-    public function getTasksByTag(Tag $tag): array
+    public function getTodosByTag(Tag $tag): array
     {
-        return $tag->getTasks()->toArray();
+        return $tag->getTodos()->toArray();
     }
 
-    /**
-     * Prépare les données pour la page filtrée par Tag
-     */
-    public function tagTasks(Tag $tag): array
+    public function tagTodos(Tag $tag): array
     {
-        $tasks = $this->getSortedCurrentTasks($this->getTasksByTag($tag));
+        $tasks = $this->getTodosByTag($tag);
 
         return [
-            'tasks' => $tasks,
+            'activeGroups' => $this->getGroupedTodos($tasks),
+            'completedTasks' => $this->getCompletedTodos($tasks),
             'userTags' => $this->getCurrentUserTags(),
-            'breadcrumb' => $this->breadcrumb([
-                new BreadcrumbItem(name: 'Étiquette : ' . $tag->getName())
-            ]),
-            'currentTag' => $tag, // Le tag actif pour pré-sélectionner l'option
+            'breadcrumb' => $this->breadcrumb([new BreadcrumbItem(name: 'Étiquette : ' . $tag->getName())]),
+            'currentTag' => $tag,
         ];
     }
 
-    /**
-     * @param array $tasks
-     * 
-     * @return array
-     */
-    private function filterTasks(array $tasks): array
-    {
-        $user = $this->getCurrentUser();
-        if (!$user) {
-            return [];
-        }
-
-        return array_filter($tasks, fn(Task $task) => $task->getOwner() === $user);
-    }
-
-    /**
-     * Prépare les données pour la page principale (Toutes les tâches)
-     */
     public function manage(): array
     {
+        $tasks = $this->getCurrentUserTodos();
+
         return [
-            'tasks' => $this->getSortedCurrentTasks(),
+            'activeGroups' => $this->getGroupedTodos($tasks),
+            'completedTasks' => $this->getCompletedTodos($tasks),
             'userTags' => $this->getCurrentUserTags(),
             'breadcrumb' => $this->breadcrumb(),
-            'currentTag' => null, // Permet à la vue de savoir qu'aucun filtre n'est actif
+            'currentTag' => null,
         ];
     }
 
-    /**
-     * Sauvegarde une tâche (Création ou Mise à jour).
-     * * Lors d'une création, assigne automatiquement l'utilisateur connecté comme propriétaire.
-     * * @param Task  $task        La tâche à sauvegarder
-     * @param bool $isCreation True si c'est une nouvelle tâche
-     * * @return bool True si l'opération a réussi
-     */
-    public function saveTask(Task $task, bool $isCreation = false): bool
+    public function saveTodo(Todo $todo, bool $isCreation = false): bool
     {
         try {
-            if ($isCreation) {
-                /** @var User $user */
-                $user = $this->security->getUser();
-                if ($user) {
-                    $task->setOwner($user);
+            if ($isCreation && $user = $this->security->getUser()) {
+                $todo->setOwner($user);
+            }
+
+            $this->repository->save(todo: $todo, flush: true, isCreation: $isCreation);
+
+            $this->generateLog(
+                LoggerLevelEnum::Info,
+                ['message' => 'Todo sauvegardée', 'task_title' => $todo->getTitle()],
+                ['action' => $isCreation ? 'todo.create.success' : 'todo.update.success']
+            );
+
+            return true;
+        } catch (Throwable $th) {
+            return false;
+        }
+    }
+
+    public function deleteTodo(Todo $todo): bool
+    {
+        try {
+            $this->repository->remove($todo, true);
+            return true;
+        } catch (Throwable $th) {
+            return false;
+        }
+    }
+
+/**
+     * Regroupe les tâches actives par sections chronologiques
+     */
+    private function getGroupedTodos(array $tasks): array
+    {
+        $groups = [
+            'overdue'   => ['label' => 'En retard', 'bg' => 'bg-danger-subtle', 'text' => 'text-danger', 'icon' => 'bx-error-circle', 'todos' => []],
+            'today'     => ['label' => 'Aujourd\'hui', 'bg' => 'bg-slate-800', 'text' => 'text-white', 'icon' => 'bx-sun', 'todos' => []],
+            'tomorrow'  => ['label' => 'Demain', 'bg' => 'bg-slate-800', 'text' => 'text-white', 'icon' => 'bx-calendar-event', 'todos' => []],
+            'this_week' => ['label' => 'Cette semaine', 'bg' => 'bg-slate-800', 'text' => 'text-white', 'icon' => 'bx-calendar-week', 'todos' => []],
+            'later'     => ['label' => 'Plus tard', 'bg' => 'bg-slate-800', 'text' => 'text-white', 'icon' => 'bx-archive', 'todos' => []],
+        ];
+
+        // Format de référence 'Y-m-d' pour ignorer totalement l'heure
+        $todayStr     = (new \DateTimeImmutable('today'))->format('Y-m-d');
+        $tomorrowStr  = (new \DateTimeImmutable('tomorrow'))->format('Y-m-d');
+        $endOfWeekStr = (new \DateTimeImmutable('sunday this week'))->format('Y-m-d');
+
+        foreach ($tasks as $todo) {
+            if ($todo->isCompleted()) {
+                continue; // Les terminées sont exclues de ce groupement
+            }
+
+            $dueDate = $todo->getDueDate();
+            if (!$dueDate) {
+                $groups['later']['todos'][] = $todo;
+                continue;
+            }
+
+            // On formate la date de la tâche pour la comparaison
+            $dueStr = $dueDate->format('Y-m-d');
+
+            if ($dueStr < $todayStr) {
+                $groups['overdue']['todos'][] = $todo;
+            } elseif ($dueStr === $todayStr) {
+                $groups['today']['todos'][] = $todo;
+            } elseif ($dueStr === $tomorrowStr) {
+                $groups['tomorrow']['todos'][] = $todo;
+            } elseif ($dueStr <= $endOfWeekStr) {
+                $groups['this_week']['todos'][] = $todo;
+            } else {
+                $groups['later']['todos'][] = $todo;
+            }
+        }
+
+        // Tri interne de chaque groupe par échéance (le plus urgent en haut)
+        // Ici on conserve l'objet DateTime complet pour trier précisément si deux tâches sont le même jour
+        foreach ($groups as &$group) {
+            usort($group['todos'], function (Todo $a, Todo $b) {
+                $dateA = $a->getDueDate();
+                $dateB = $b->getDueDate();
+                if ($dateA && $dateB) {
+                    return $dateA <=> $dateB;
                 }
-            }
-
-            // Appel de la méthode du repository (qui gère le flush)
-            $this->repository->save(task: $task, flush: true, isCreation: $isCreation);
-
-            $this->generateLog(
-                LoggerLevelEnum::Info,
-                [
-                    'message' => 'Task sauvegardée avec succès',
-                    'task_title' => $task->getTitle(),
-                ],
-                ['action' => $isCreation ? 'task.create.success' : 'task.update.success']
-            );
-
-            return true;
-        } catch (Throwable $th) {
-            $this->generateLog(
-                LoggerLevelEnum::Error,
-                [
-                    'message' => 'Erreur lors de la sauvegarde de la tâche',
-                    'task_title' => $task->getTitle(),
-                    'error' => $th->getMessage()
-                ],
-                ['action' => 'task.save.error']
-            );
-            return false;
+                return 0;
+            });
         }
+
+        // On ne retourne que les sections qui ont au moins 1 tâche
+        return array_filter($groups, fn($g) => count($g['todos']) > 0);
     }
-
     /**
-     * Récupère les tâches de l'utilisateur connecté avec un tri intelligent :
-     * 1. Les tâches actives triées par urgence (échéance la plus proche).
-     * 2. Les tâches terminées reléguées à la fin.
-     * @param ?array $tasks Un tableau de tâches à trier (optionnel, sinon tri les tâches de l'utilisateur connecté)
-     * 
-     * @return Task[]
+     * Récupère uniquement les tâches terminées (à part)
      */
-    public function getSortedCurrentTasks(?array $tasks = null): array
+    private function getCompletedTodos(array $tasks): array
     {
-        $tasks = $tasks ?? $this->getCurrentUserTasks();
+        $completed = array_filter($tasks, fn(Todo $todo) => $todo->isCompleted());
 
-        // 1. On sépare les tâches actives des tâches terminées
-        $activeTasks = array_filter($tasks, fn(Task $task) => !$task->isCompleted());
-        $completedTasks = array_filter($tasks, fn(Task $task) => $task->isCompleted());
-
-        // 2. On trie UNIQUEMENT les tâches actives par échéance
-        usort($activeTasks, function (Task $a, Task $b) {
-            $dateA = $a->getDueDate();
-            $dateB = $b->getDueDate();
-
-            if ($dateA && $dateB) {
-                return $dateA <=> $dateB; // Du plus urgent au plus lointain
-            }
-
-            if ($dateA)
-                return -1;
-            if ($dateB)
-                return 1;
-
-            if (method_exists($a, 'getCreatedAt') && method_exists($b, 'getCreatedAt')) {
-                return $b->getCreatedAt() <=> $a->getCreatedAt();
-            }
-
-            return 0;
-        });
-
-        // 3. Optionnel : On trie les tâches terminées par date de création (les plus récentes en premier)
-        usort($completedTasks, function (Task $a, Task $b) {
-            if (method_exists($a, 'getCreatedAt') && method_exists($b, 'getCreatedAt')) {
-                return $b->getCreatedAt() <=> $a->getCreatedAt();
+        // Optionnel : on peut trier les tâches terminées de la plus récemment achevée à la plus ancienne
+        usort($completed, function (Todo $a, Todo $b) {
+            if (method_exists($a, 'getCompletedAt') && method_exists($b, 'getCompletedAt')) {
+                return $b->getCompletedAt() <=> $a->getCompletedAt();
             }
             return 0;
         });
 
-        // 4. On fusionne les deux tableaux (Actives d'abord, Terminées ensuite)
-        return array_merge($activeTasks, $completedTasks);
+        return $completed;
     }
 
-    /**
-     * Supprime un Task.
-     * * @param Task $task Le task à supprimer
-     * * @return bool True en cas de succès
-     */
-    public function deleteTask(Task $task): bool
-    {
-        try {
-            $taskId = $task->getId();
-
-            $this->repository->remove($task, true);
-
-            $this->generateLog(
-                LoggerLevelEnum::Info,
-                [
-                    'message' => 'Task supprimé avec succès',
-                    'task_id' => $taskId
-                ],
-                ['action' => 'task.delete.success']
-            );
-
-            return true;
-        } catch (Throwable $th) {
-            $this->generateLog(
-                LoggerLevelEnum::Error,
-                [
-                    'message' => 'Erreur lors de la suppression de la tâche',
-                    'task_id' => $task->getId(),
-                    'error' => $th->getMessage()
-                ],
-                ['action' => 'task.delete.error']
-            );
-            return false;
-        }
-    }
-
-    /**
-     * Récupère tous les tâches appartenant à un utilisateur précis.
-     * * @param User $user Le propriétaire des tâches
-     * * @return Task[]
-     */
-    public function getUserTasks(User $user): array
+    public function getUserTodos(User $user): array
     {
         return $this->repository->findBy(['owner' => $user], ['title' => 'ASC']);
     }
 
-    /**
-     * @return User|null
-     */
     private function getCurrentUser(): ?User
     {
         $user = $this->security->getUser();
-        if ($user instanceof User) {
-            return $user;
-        }
-
-        return null;
+        return $user instanceof User ? $user : null;
     }
 
-    /**
-     * Raccourci pour récupérer les tâches de l'utilisateur actuellement connecté.
-     * * @return Task[]
-     */
-    public function getCurrentUserTasks(): array
+    public function getCurrentUserTodos(): array
     {
-        /** @var User|null $user */
         $user = $this->getCurrentUser();
-
-        if (!$user) {
-            return [];
-        }
-
-        return $this->getUserTasks($user);
+        return $user ? $this->getUserTodos($user) : [];
     }
 
-    /**
-     * Génère le fil d'Ariane pour la gestion des tâches.
-     * @param BreadcrumbItem[] $items Les éléments du fil d'Ariane
-     * * @return Breadcrumb
-     */
     public function breadcrumb(array $items = []): Breadcrumb
     {
         return new Breadcrumb([
@@ -281,5 +201,4 @@ final class TodoService
             ...$items
         ]);
     }
-
 }

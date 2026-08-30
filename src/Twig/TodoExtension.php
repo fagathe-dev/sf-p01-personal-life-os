@@ -2,7 +2,6 @@
 
 namespace App\Twig;
 
-use App\Enum\Task\TaskPriorityEnum;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
@@ -11,40 +10,35 @@ class TodoExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            // is_safe permet de renvoyer du HTML interprétable
-            new TwigFilter('todo_priority_badge', [$this, 'getPriorityBadge'], ['is_safe' => ['html']]),
+            new TwigFilter('todo_due_status', [$this, 'getTodoDueStatus']),
         ];
     }
 
-    public function getPriorityBadge(TaskPriorityEnum|string|null $priority): string
+    public function getTodoDueStatus(?\DateTimeInterface $dueDate): ?array
     {
-        if (!$priority) {
-            return '';
+        if (!$dueDate) {
+            return null;
         }
 
-        // Si la priorité est passée sous forme de string, on la convertit en Enum
-        if (is_string($priority)) {
-            $priority = TaskPriorityEnum::tryFrom($priority);
+        $todayStr     = (new \DateTimeImmutable('today'))->format('Y-m-d');
+        $tomorrowStr  = (new \DateTimeImmutable('tomorrow'))->format('Y-m-d');
+        $endOfWeekStr = (new \DateTimeImmutable('sunday this week'))->format('Y-m-d');
+
+        $dueStr = $dueDate->format('Y-m-d');
+
+        if ($dueStr < $todayStr) {
+            return ['label' => 'En retard', 'color' => 'danger', 'icon' => 'bx-error-circle'];
         }
-
-        if (!$priority instanceof TaskPriorityEnum) {
-            return '';
+        if ($dueStr === $todayStr) {
+            return ['label' => 'Aujourd\'hui', 'color' => 'warning', 'icon' => 'bx-sun'];
         }
-
-        $color = match ($priority) {
-            TaskPriorityEnum::Low => 'success',
-            TaskPriorityEnum::Medium => 'info', // J'ai choisi Info pour bien différencier du Primary global
-            TaskPriorityEnum::High => 'warning',
-            TaskPriorityEnum::Critical => 'danger',
-        };
-
-        $label = TaskPriorityEnum::getMap($priority);
-
-        return sprintf(
-            '<span class="badge bg-%s-subtle text-%s ms-2" style="font-size: 10px;">%s</span>',
-            $color,
-            $color,
-            $label
-        );
+        if ($dueStr === $tomorrowStr) {
+            return ['label' => 'Demain', 'color' => 'info', 'icon' => 'bx-calendar-event'];
+        }
+        if ($dueStr <= $endOfWeekStr) {
+            return ['label' => 'Cette semaine', 'color' => 'primary', 'icon' => 'bx-calendar-week'];
+        }
+        
+        return ['label' => 'Plus tard', 'color' => 'secondary', 'icon' => 'bx-archive'];
     }
 }

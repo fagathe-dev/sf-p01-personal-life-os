@@ -9,7 +9,7 @@ enum TodoDueDateEnum: string
     case Today = 'today';
     case Tomorrow = 'tomorrow';
     case ThisWeek = 'this_week';
-    case NextWeek = 'next_week';
+    case Later = 'later';
 
     /**
      * Retourne la map des valeurs de l'enum ou une valeur spécifique si fournie
@@ -23,7 +23,7 @@ enum TodoDueDateEnum: string
             self::Today->value => 'Aujourd\'hui',
             self::Tomorrow->value => 'Demain',
             self::ThisWeek->value => 'Cette semaine',
-            self::NextWeek->value => 'La semaine prochaine',
+            self::Later->value => 'Plus tard',
         ];
 
         if (!is_null($enum)) {
@@ -81,8 +81,7 @@ enum TodoDueDateEnum: string
             self::Today => 'now',
             self::Tomorrow => '+1 day',
             self::ThisWeek => 'sunday this week', // Dimanche de la semaine en cours
-            self::NextWeek => 'sunday next week', // Dimanche de la semaine prochaine
-            default => null,
+            self::Later => '+2 days',
         };
 
         $dateTime = new DateTimeImmutable($mutator, new \DateTimeZone('Europe/Paris'));

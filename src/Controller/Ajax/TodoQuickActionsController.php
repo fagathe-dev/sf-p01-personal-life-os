@@ -1,8 +1,7 @@
 <?php
 namespace App\Controller\Ajax;
 
-use App\Entity\Task;
-use App\Enum\Task\TaskStateEnum;
+use App\Entity\Todo;
 use App\Service\TodoService;
 use Fagathe\CorePhp\Trait\DatetimeTrait;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -32,10 +31,10 @@ final class TodoQuickActionsController extends AbstractController
             return new JsonResponse(['success' => false, 'error' => 'Titre vide'], 400);
         }
 
-        $task = new Task();
+        $task = new Todo();
         $task->setTitle(trim($title));
 
-        if ($this->todoService->saveTask($task, true)) {
+        if ($this->todoService->saveTodo($task, true)) {
             // 🔥 L'ASTUCE : On demande à Symfony de générer le HTML de la petite carte !
             $html = $this->renderView('app/todo/_component.html.twig', [
                 'task' => $task
@@ -51,7 +50,7 @@ final class TodoQuickActionsController extends AbstractController
     }
 
     #[Route(path: '/{id}/toggle-completed', name: 'toggle_completed', methods: ['POST'])]
-    public function toggleCompleted(#[MapEntity(mapping: ['id' => 'id'])] Task $task): JsonResponse
+    public function toggleCompleted(#[MapEntity(mapping: ['id' => 'id'])] Todo $task): JsonResponse
     {
         // Sécurité métier
         if ($task->getOwner() !== $this->getUser()) {
@@ -61,17 +60,13 @@ final class TodoQuickActionsController extends AbstractController
         // 1. On bascule le statut booléen natif
         $task->toggleCompleted();
 
-        // 2. Application du workflow métier complet
         if ($task->isCompleted()) {
-            $task->setState(TaskStateEnum::Done);
             $task->setCompletedAt($this->now());
         } else {
-            // Si on décoche, on remet l'état à "À faire" et on vide la date de complétion
-            $task->setState(TaskStateEnum::Todo);
             $task->setCompletedAt(null);
         }
 
-        $this->todoService->saveTask($task, false);
+        $this->todoService->saveTodo($task, false);
 
         return new JsonResponse([
             'success' => true,
@@ -79,19 +74,4 @@ final class TodoQuickActionsController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/{id}/toggle-pinned', name: 'toggle_pinned', methods: ['POST'])]
-    public function togglePinned(#[MapEntity(mapping: ['id' => 'id'])] Task $task): JsonResponse
-    {
-        if ($task->getOwner() !== $this->getUser()) {
-            return new JsonResponse(['success' => false, 'error' => 'Accès refusé'], 403);
-        }
-
-        $task->togglePinned();
-        $this->todoService->saveTask($task, false);
-
-        return new JsonResponse([
-            'success' => true,
-            'is_pinned' => $task->isPinned()
-        ]);
-    }
 }
