@@ -38,17 +38,17 @@ class Tag
     private ?User $owner = null;
 
     /**
-     * @var Collection<int, Todo>
+     * @var Collection<int, Task>
      */
-    #[ORM\OneToMany(targetEntity: Todo::class, mappedBy: 'tag')]
-    private Collection $todos;
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'tag')]
+    private Collection $tasks;
 
     #[ORM\Column(nullable: true)]
     private ?int $position = null;
 
     public function __construct()
     {
-        $this->todos = new ArrayCollection();
+        $this->tasks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -133,11 +133,11 @@ class Tag
     }
 
     /**
-     * @return Collection<int, Todo>
+     * @return Collection<int, Task>
      */
-    public function getTodos(): Collection
+    public function getTasks(): Collection
     {
-        return $this->todos;
+        return $this->tasks;
     }
 
     public function getPosition(): ?int
