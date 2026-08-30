@@ -90,7 +90,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(allowNull: true, message: 'Veuillez saisir un nom')]
     private ?string $lastname = null;
 
-    #[ORM\ManyToOne(inversedBy: 'owner', orphanRemoval: true)]
+    #[ORM\ManyToOne(inversedBy: 'owner')]
     #[ORM\JoinColumn(nullable: false)]
     private ?SubTask $subTask = null;
 
