@@ -132,3 +132,8 @@ $custom-colors:
   border-color: var(--bs-primary) !important;
   background-color: rgba(var(--bs-primary-rgb), 0.08) !important;
 }
+
+.todo-content {
+  min-height: calc(100vh - 362px);
+  height: auto;
+}

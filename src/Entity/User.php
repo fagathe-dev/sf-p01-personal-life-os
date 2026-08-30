@@ -74,6 +74,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Tag::class, mappedBy: 'owner', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $tags;
 
+    /**
+     * @var Collection<int, Todo>
+     */
+    #[ORM\OneToMany(targetEntity: Todo::class, mappedBy: 'owner', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $todos;
+
     #[ORM\Column(length: 80, nullable: true)]
     #[Assert\Length(max: 80, maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.')]
     #[Assert\NotBlank(allowNull: true, message: 'Veuillez saisir un prénom')]
@@ -88,6 +94,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->userRequests = new ArrayCollection();
         $this->tags = new ArrayCollection();
+        $this->todos = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -323,6 +330,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($tag->getOwner() === $this) {
                 $tag->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Todo>
+     */
+    public function getTodos(): Collection
+    {
+        return $this->todos;
+    }
+
+    public function addTodo(Todo $todo): static
+    {
+        if (!$this->todos->contains($todo)) {
+            $this->todos->add($todo);
+            $todo->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTodo(Todo $todo): static
+    {
+        if ($this->todos->removeElement($todo)) {
+            if ($todo->getOwner() === $this) {
+                $todo->setOwner(null);
             }
         }
 

@@ -6,7 +6,6 @@ const ROUTES = {
   },
   TODO: {
     TOGGLE_COMPLETED: '/ajax/todo/{id}/toggle-completed',
-    TOGGLE_PINNED: '/ajax/todo/{id}/toggle-pinned',
   },
 } as const;
 

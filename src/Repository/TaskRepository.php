@@ -2,14 +2,14 @@
 
 namespace App\Repository;
 
-use App\Entity\Task;
+use App\Entity\Todo;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 use Fagathe\CorePhp\Trait\DatetimeTrait;
 
 /**
- * @extends ServiceEntityRepository<Task>
+ * @extends ServiceEntityRepository<Todo>
  */
 class TaskRepository extends ServiceEntityRepository
 {
@@ -18,19 +18,19 @@ class TaskRepository extends ServiceEntityRepository
 
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Task::class);
+        parent::__construct($registry, Todo::class);
     }
 
     /**
      * Supprime une tâche
-     * @param Task $task L'entité à supprimer
+     * @param Todo $todo L'entité à supprimer
      * @param bool $flush Faut-il exécuter la requête tout de suite ?
      * @return bool Succès de l'opération
      */
-    public function remove(Task $task, bool $flush = true): bool
+    public function remove(Todo $todo, bool $flush = true): bool
     {
         try {
-            $this->getEntityManager()->remove($task);
+            $this->getEntityManager()->remove($todo);
 
             if ($flush) {
                 $this->getEntityManager()->flush();
@@ -44,21 +44,21 @@ class TaskRepository extends ServiceEntityRepository
 
     /**
      * Sauvegarde une tâche (Création ou Mise à jour)
-     * @param Task $task L'entité à sauvegarder
+     * @param Todo $todo L'entité à sauvegarder
      * @param bool $flush Faut-il envoyer en base tout de suite ?
      * @return bool Succès de l'opération
      */
-    public function save(Task $task, bool $flush = true, bool $isCreation = false): bool
+    public function save(Todo $todo, bool $flush = true, bool $isCreation = false): bool
     {
         $now = $this->now();
         if ($isCreation) {
-            $task->setCreatedAt($now);
+            $todo->setCreatedAt($now);
         } else {
-            $task->setUpdatedAt($now);
+            $todo->setUpdatedAt($now);
         }
 
         try {
-            $this->getEntityManager()->persist($task);
+            $this->getEntityManager()->persist($todo);
 
             if ($flush) {
                 $this->getEntityManager()->flush();
