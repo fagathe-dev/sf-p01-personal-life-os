@@ -3,7 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Tag;
-use App\Entity\Todo;
+use App\Entity\Task;
 use App\Entity\User;
 use App\Repository\TagRepository;
 use App\Repository\TaskRepository;
@@ -16,7 +16,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Throwable;
 
-final class TodoService
+final class TaskService
 {
     use LoggerTrait, DatetimeTrait;
 
@@ -36,18 +36,18 @@ final class TodoService
         return $this->tagRepository->findBy(['owner' => $user], ['name' => 'ASC']);
     }
 
-    public function getTodosByTag(Tag $tag): array
+    public function getTasksByTag(Tag $tag): array
     {
-        return $tag->getTodos()->toArray();
+        return $tag->getTasks()->toArray();
     }
 
-    public function tagTodos(Tag $tag): array
+    public function tagTasks(Tag $tag): array
     {
-        $tasks = $this->getTodosByTag($tag);
+        $tasks = $this->getTasksByTag($tag);
 
         return [
-            'activeGroups' => $this->getGroupedTodos($tasks),
-            'completedTasks' => $this->getCompletedTodos($tasks),
+            'activeGroups' => $this->getGroupedTasks($tasks),
+            'completedTasks' => $this->getCompletedTasks($tasks),
             'userTags' => $this->getCurrentUserTags(),
             'breadcrumb' => $this->breadcrumb([new BreadcrumbItem(name: 'Étiquette : ' . $tag->getName())]),
             'currentTag' => $tag,
@@ -56,30 +56,30 @@ final class TodoService
 
     public function manage(): array
     {
-        $tasks = $this->getCurrentUserTodos();
+        $tasks = $this->getCurrentUserTasks();
 
         return [
-            'activeGroups' => $this->getGroupedTodos($tasks),
-            'completedTasks' => $this->getCompletedTodos($tasks),
+            'activeGroups' => $this->getGroupedTasks($tasks),
+            'completedTasks' => $this->getCompletedTasks($tasks),
             'userTags' => $this->getCurrentUserTags(),
             'breadcrumb' => $this->breadcrumb(),
             'currentTag' => null,
         ];
     }
 
-    public function saveTodo(Todo $todo, bool $isCreation = false): bool
+    public function saveTask(Task $task, bool $isCreation = false): bool
     {
         try {
             if ($isCreation && $user = $this->security->getUser()) {
-                $todo->setOwner($user);
+                $task->setOwner($user);
             }
 
-            $this->repository->save(todo: $todo, flush: true, isCreation: $isCreation);
+            $this->repository->save(task: $task, flush: true, isCreation: $isCreation);
 
             $this->generateLog(
                 LoggerLevelEnum::Info,
-                ['message' => 'Todo sauvegardée', 'task_title' => $todo->getTitle()],
-                ['action' => $isCreation ? 'todo.create.success' : 'todo.update.success']
+                ['message' => 'Task sauvegardée', 'task_title' => $task->getTitle()],
+                ['action' => $isCreation ? 'task.create.success' : 'task.update.success']
             );
 
             return true;
@@ -88,10 +88,10 @@ final class TodoService
         }
     }
 
-    public function deleteTodo(Todo $todo): bool
+    public function deleteTask(Task $task): bool
     {
         try {
-            $this->repository->remove($todo, true);
+            $this->repository->remove($task, true);
             return true;
         } catch (Throwable $th) {
             return false;
@@ -101,14 +101,14 @@ final class TodoService
 /**
      * Regroupe les tâches actives par sections chronologiques
      */
-    private function getGroupedTodos(array $tasks): array
+    private function getGroupedTasks(array $tasks): array
     {
         $groups = [
-            'overdue'   => ['label' => 'En retard', 'bg' => 'bg-danger-subtle', 'text' => 'text-danger', 'icon' => 'bx-error-circle', 'todos' => []],
-            'today'     => ['label' => 'Aujourd\'hui', 'bg' => 'bg-slate-800', 'text' => 'text-white', 'icon' => 'bx-sun', 'todos' => []],
-            'tomorrow'  => ['label' => 'Demain', 'bg' => 'bg-slate-800', 'text' => 'text-white', 'icon' => 'bx-calendar-event', 'todos' => []],
-            'this_week' => ['label' => 'Cette semaine', 'bg' => 'bg-slate-800', 'text' => 'text-white', 'icon' => 'bx-calendar-week', 'todos' => []],
-            'later'     => ['label' => 'Plus tard', 'bg' => 'bg-slate-800', 'text' => 'text-white', 'icon' => 'bx-archive', 'todos' => []],
+            'overdue'   => ['label' => 'En retard', 'bg' => 'bg-danger-subtle', 'text' => 'text-danger', 'icon' => 'bx-error-circle', 'tasks' => []],
+            'today'     => ['label' => 'Aujourd\'hui', 'bg' => 'bg-slate-800', 'text' => 'text-white', 'icon' => 'bx-sun', 'tasks' => []],
+            'tomorrow'  => ['label' => 'Demain', 'bg' => 'bg-slate-800', 'text' => 'text-white', 'icon' => 'bx-calendar-event', 'tasks' => []],
+            'this_week' => ['label' => 'Cette semaine', 'bg' => 'bg-slate-800', 'text' => 'text-white', 'icon' => 'bx-calendar-week', 'tasks' => []],
+            'later'     => ['label' => 'Plus tard', 'bg' => 'bg-slate-800', 'text' => 'text-white', 'icon' => 'bx-archive', 'tasks' => []],
         ];
 
         // Format de référence 'Y-m-d' pour ignorer totalement l'heure
@@ -116,14 +116,14 @@ final class TodoService
         $tomorrowStr  = (new \DateTimeImmutable('tomorrow'))->format('Y-m-d');
         $endOfWeekStr = (new \DateTimeImmutable('sunday this week'))->format('Y-m-d');
 
-        foreach ($tasks as $todo) {
-            if ($todo->isCompleted()) {
+        foreach ($tasks as $task) {
+            if ($task->isCompleted()) {
                 continue; // Les terminées sont exclues de ce groupement
             }
 
-            $dueDate = $todo->getDueDate();
+            $dueDate = $task->getDueDate();
             if (!$dueDate) {
-                $groups['later']['todos'][] = $todo;
+                $groups['later']['tasks'][] = $task;
                 continue;
             }
 
@@ -131,22 +131,22 @@ final class TodoService
             $dueStr = $dueDate->format('Y-m-d');
 
             if ($dueStr < $todayStr) {
-                $groups['overdue']['todos'][] = $todo;
+                $groups['overdue']['tasks'][] = $task;
             } elseif ($dueStr === $todayStr) {
-                $groups['today']['todos'][] = $todo;
+                $groups['today']['tasks'][] = $task;
             } elseif ($dueStr === $tomorrowStr) {
-                $groups['tomorrow']['todos'][] = $todo;
+                $groups['tomorrow']['tasks'][] = $task;
             } elseif ($dueStr <= $endOfWeekStr) {
-                $groups['this_week']['todos'][] = $todo;
+                $groups['this_week']['tasks'][] = $task;
             } else {
-                $groups['later']['todos'][] = $todo;
+                $groups['later']['tasks'][] = $task;
             }
         }
 
         // Tri interne de chaque groupe par échéance (le plus urgent en haut)
         // Ici on conserve l'objet DateTime complet pour trier précisément si deux tâches sont le même jour
         foreach ($groups as &$group) {
-            usort($group['todos'], function (Todo $a, Todo $b) {
+            usort($group['tasks'], function (Task $a, Task $b) {
                 $dateA = $a->getDueDate();
                 $dateB = $b->getDueDate();
                 if ($dateA && $dateB) {
@@ -157,17 +157,17 @@ final class TodoService
         }
 
         // On ne retourne que les sections qui ont au moins 1 tâche
-        return array_filter($groups, fn($g) => count($g['todos']) > 0);
+        return array_filter($groups, fn($g) => count($g['tasks']) > 0);
     }
     /**
      * Récupère uniquement les tâches terminées (à part)
      */
-    private function getCompletedTodos(array $tasks): array
+    private function getCompletedTasks(array $tasks): array
     {
-        $completed = array_filter($tasks, fn(Todo $todo) => $todo->isCompleted());
+        $completed = array_filter($tasks, fn(Task $task) => $task->isCompleted());
 
         // Optionnel : on peut trier les tâches terminées de la plus récemment achevée à la plus ancienne
-        usort($completed, function (Todo $a, Todo $b) {
+        usort($completed, function (Task $a, Task $b) {
             if (method_exists($a, 'getCompletedAt') && method_exists($b, 'getCompletedAt')) {
                 return $b->getCompletedAt() <=> $a->getCompletedAt();
             }
@@ -177,7 +177,7 @@ final class TodoService
         return $completed;
     }
 
-    public function getUserTodos(User $user): array
+    public function getUserTasks(User $user): array
     {
         return $this->repository->findBy(['owner' => $user], ['title' => 'ASC']);
     }
@@ -188,16 +188,16 @@ final class TodoService
         return $user instanceof User ? $user : null;
     }
 
-    public function getCurrentUserTodos(): array
+    public function getCurrentUserTasks(): array
     {
         $user = $this->getCurrentUser();
-        return $user ? $this->getUserTodos($user) : [];
+        return $user ? $this->getUserTasks($user) : [];
     }
 
     public function breadcrumb(array $items = []): Breadcrumb
     {
         return new Breadcrumb([
-            new BreadcrumbItem(name: 'Todo List', link: $this->urlGenerator->generate('app_todo_manage')),
+            new BreadcrumbItem(name: 'Task List', link: $this->urlGenerator->generate('app_task_manage')),
             ...$items
         ]);
     }
