@@ -5,16 +5,16 @@ namespace App\Twig;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-class TodoExtension extends AbstractExtension
+class TaskExtension extends AbstractExtension
 {
     public function getFilters(): array
     {
         return [
-            new TwigFilter('todo_due_status', [$this, 'getTodoDueStatus']),
+            new TwigFilter('task_due_status', [$this, 'getTaskDueStatus']),
         ];
     }
 
-    public function getTodoDueStatus(?\DateTimeInterface $dueDate): ?array
+    public function getTaskDueStatus(?\DateTimeInterface $dueDate): ?array
     {
         if (!$dueDate) {
             return null;

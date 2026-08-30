@@ -61,7 +61,7 @@ Récupère les requêtes HTTP, appelle les services, retourne les réponses.
 **Organisation par domaine:**
 - **`Controller/App/`** :
   - `NoteController` → Actions CRUD pour les notes (manage, create, edit, delete, tag_notes)
-  - `TodoController` → Actions CRUD pour les tâches
+  - `TaskController` → Actions CRUD pour les tâches
   - `DriveController` → Actions CRUD pour les documents et dossiers
 - **`Controller/Auth/`** :
   - `LoginController` → Authentification
@@ -75,7 +75,7 @@ Récupère les requêtes HTTP, appelle les services, retourne les réponses.
   - `LogController` → Logs de l'application
 - **`Controller/Ajax/`** :
   - `NoteQuickActionsController` → Actions rapides sur les notes (AJAX)
-  - `TodoQuickActionsController` → Actions rapides sur les tâches (AJAX)
+  - `TaskQuickActionsController` → Actions rapides sur les tâches (AJAX)
   - `AjaxDriveController` → Actions rapides sur les documents (AJAX)
 - **`LayoutController`**, **`DefaultController`** : Pages génériques
 
@@ -92,7 +92,7 @@ Centralise la logique complexe, isolée des controllers et repositories.
 
 **Services principaux:**
 - **`NoteService`** : CRUD, validation, filtrage des notes
-- **`TodoService`** : CRUD, validation, gestion des priorités et états des tâches
+- **`TaskService`** : CRUD, validation, gestion des priorités et états des tâches
 - **`DriveService`** : Gestion des dossiers et documents
 - **`TagService`** : Gestion des étiquettes
 - **`UserService`** : Gestion des utilisateurs (avatar, profil, etc.)
@@ -116,7 +116,7 @@ Utilise Symfony FormType pour:
 **Exemples:**
 - **`Form/App/Note/NoteType`** : Formulaire complet d'une note (title, content, tag, color)
 - **`Form/App/Note/NoteQuickAddType`** : Formulaire réduit pour ajout rapide
-- **`Form/App/TodoType`** → Formulaire complet d'une tâche
+- **`Form/App/TaskType`** → Formulaire complet d'une tâche
 - **`Form/Auth/Profile/ProfileInfoType`** → Profil utilisateur
 - **`Form/Auth/LoginFormType`** → Connexion
 
@@ -330,7 +330,7 @@ Fonctions helpers réutilisables.
 │  ┌───────────────▼─────────────────┐ ┌───────────▼─┐ │
 │  │ Services (Business Logic)       │ │ FormTypes   │ │
 │  │ - NoteService                   │ │ - Validate  │ │
-│  │ - TodoService                   │ │ - Render    │ │
+│  │ - TaskService                   │ │ - Render    │ │
 │  │ - DriveService, etc.            │ │ - Data Map  │ │
 │  └───────────────┬─────────────────┘ └─────────────┘ │
 │                  │                                     │
