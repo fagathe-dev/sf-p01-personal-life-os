@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use App\Enum\Task\TodoDueDateEnum;
 use App\Repository\TaskRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
 #[ORM\Table(name: 'task')]
-class Todo
+class Task
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -36,11 +36,17 @@ class Todo
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $due_date = null;
 
-    #[ORM\ManyToOne(inversedBy: 'todos')]
+    #[ORM\ManyToOne(inversedBy: 'tasks')]
     private ?User $owner = null;
 
-    #[ORM\ManyToOne(targetEntity: Tag::class, inversedBy: 'todos')]
+    #[ORM\ManyToOne(targetEntity: Tag::class, inversedBy: 'tasks')]
     private ?Tag $tag = null;
+
+    #[ORM\ManyToOne(inversedBy: 'task')]
+    private ?SubTask $subTask = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
 
     public function getId(): ?int
     {
@@ -125,6 +131,30 @@ class Todo
     public function setTag(?Tag $tag): static
     {
         $this->tag = $tag;
+        return $this;
+    }
+
+    public function getSubTask(): ?SubTask
+    {
+        return $this->subTask;
+    }
+
+    public function setSubTask(?SubTask $subTask): static
+    {
+        $this->subTask = $subTask;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
         return $this;
     }
 }

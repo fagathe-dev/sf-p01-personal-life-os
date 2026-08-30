@@ -75,10 +75,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $tags;
 
     /**
-     * @var Collection<int, Todo>
+     * @var Collection<int, Task>
      */
-    #[ORM\OneToMany(targetEntity: Todo::class, mappedBy: 'owner', cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Collection $todos;
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'owner', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $tasks;
 
     #[ORM\Column(length: 80, nullable: true)]
     #[Assert\Length(max: 80, maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.')]
@@ -90,11 +90,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(allowNull: true, message: 'Veuillez saisir un nom')]
     private ?string $lastname = null;
 
+    #[ORM\ManyToOne(inversedBy: 'owner', orphanRemoval: true)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?SubTask $subTask = null;
+
     public function __construct()
     {
         $this->userRequests = new ArrayCollection();
         $this->tags = new ArrayCollection();
-        $this->todos = new ArrayCollection();
+        $this->tasks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -337,28 +341,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Todo>
+     * @return Collection<int, Task>
      */
-    public function getTodos(): Collection
+    public function getTasks(): Collection
     {
-        return $this->todos;
+        return $this->tasks;
     }
 
-    public function addTodo(Todo $todo): static
+    public function addTask(Task $task): static
     {
-        if (!$this->todos->contains($todo)) {
-            $this->todos->add($todo);
-            $todo->setOwner($this);
+        if (!$this->tasks->contains($task)) {
+            $this->tasks->add($task);
+            $task->setOwner($this);
         }
 
         return $this;
     }
 
-    public function removeTodo(Todo $todo): static
+    public function removeTask(Task $task): static
     {
-        if ($this->todos->removeElement($todo)) {
-            if ($todo->getOwner() === $this) {
-                $todo->setOwner(null);
+        if ($this->tasks->removeElement($task)) {
+            if ($task->getOwner() === $this) {
+                $task->setOwner(null);
             }
         }
 
@@ -397,5 +401,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return '@' . (string) $this->username;
+    }
+
+    public function getSubTask(): ?SubTask
+    {
+        return $this->subTask;
+    }
+
+    public function setSubTask(?SubTask $subTask): static
+    {
+        $this->subTask = $subTask;
+
+        return $this;
     }
 }

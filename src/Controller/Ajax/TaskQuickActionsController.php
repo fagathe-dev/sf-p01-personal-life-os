@@ -1,8 +1,8 @@
 <?php
 namespace App\Controller\Ajax;
 
-use App\Entity\Todo;
-use App\Service\TodoService;
+use App\Entity\Task;
+use App\Service\TaskService;
 use Fagathe\CorePhp\Trait\DatetimeTrait;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -10,13 +10,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(path: '/ajax/todo', name: 'ajax_todo_')]
-final class TodoQuickActionsController extends AbstractController
+#[Route(path: '/ajax/task', name: 'ajax_task_')]
+final class TaskQuickActionsController extends AbstractController
 {
 
     use DatetimeTrait;
 
-    public function __construct(private readonly TodoService $todoService)
+    public function __construct(private readonly TaskService $taskService)
     {
     }
 
@@ -31,12 +31,12 @@ final class TodoQuickActionsController extends AbstractController
             return new JsonResponse(['success' => false, 'error' => 'Titre vide'], 400);
         }
 
-        $task = new Todo();
+        $task = new Task();
         $task->setTitle(trim($title));
 
-        if ($this->todoService->saveTodo($task, true)) {
+        if ($this->taskService->saveTask($task, true)) {
             // 🔥 L'ASTUCE : On demande à Symfony de générer le HTML de la petite carte !
-            $html = $this->renderView('app/todo/_component.html.twig', [
+            $html = $this->renderView('app/task/_component.html.twig', [
                 'task' => $task
             ]);
 
@@ -50,7 +50,7 @@ final class TodoQuickActionsController extends AbstractController
     }
 
     #[Route(path: '/{id}/toggle-completed', name: 'toggle_completed', methods: ['POST'])]
-    public function toggleCompleted(#[MapEntity(mapping: ['id' => 'id'])] Todo $task): JsonResponse
+    public function toggleCompleted(#[MapEntity(mapping: ['id' => 'id'])] Task $task): JsonResponse
     {
         // Sécurité métier
         if ($task->getOwner() !== $this->getUser()) {
@@ -66,7 +66,7 @@ final class TodoQuickActionsController extends AbstractController
             $task->setCompletedAt(null);
         }
 
-        $this->todoService->saveTodo($task, false);
+        $this->taskService->saveTask($task, false);
 
         return new JsonResponse([
             'success' => true,
